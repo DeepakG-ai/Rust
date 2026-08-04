@@ -1,0 +1,20 @@
+[package]
+name = "Rust"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+[[bin]]
+name = "borrow"
+path = "src/borrow.rs"
+[[bin]]
+name = "rectangle"
+path = "src/rectangle.rs"
+[[bin]]
+name = "enum"
+path = "src/enum.rs"
+[[bin]]
+name = "enum2"
+path = "src/enum2.rs"
+
+
