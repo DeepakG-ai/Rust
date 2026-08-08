@@ -1,7 +1,7 @@
 fn main() {
     let direction = "east";
 
-    if direction == "East" {
+    if dirction == "East" {
         println!("Moving East!");
     }
 }

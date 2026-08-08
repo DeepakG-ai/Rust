@@ -16,5 +16,8 @@ path = "src/enum.rs"
 [[bin]]
 name = "enum2"
 path = "src/enum2.rs"
+[[bin]]
+name = "string"
+path = "src/string.rs"
 
 
