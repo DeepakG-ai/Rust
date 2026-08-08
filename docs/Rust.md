@@ -587,3 +587,61 @@ fn main() {
 ```
 
 > `1..4` generates 1, 2, 3 (end is **exclusive**). `1..=4` generates 1, 2, 3, 4 (end is **inclusive**).
+
+## String Types: `&str` vs `String`
+
+In Rust, understanding the difference between the two main string types, `&str` (string slice) and `String`, is very important.
+
+### 1. `let s = "hello";` (String Slice - `&str`)
+
+When you write this, `s` is of type `&str` (specifically `&'static str`).
+
+- **Memory Location:** The text `"hello"` is hardcoded directly into the final executable binary file (in the read-only memory section). It will point to the binary, **not** the heap.
+- **Immutability:** It is fundamentally immutable. You cannot change the characters inside it or grow its size.
+- **Size:** Its size is known at compile time and is fixed.
+- **Speed:** It is very fast and lightweight because it's just a reference (a pointer and a length) to data that already exists in the binary.
+
+```rust
+// Variable `s` points to the binary memory
+// Stack representation:
+// [ Pointer ] ----------> (Points to the binary memory)
+// [ Length: 5 ]
+
+fn main() {
+    let mut s = "hello";
+    println!("{}", s); // Prints: hello
+
+    // This works! We are reassigning the variable 's' to point to a new fixed string.
+    s = "world"; 
+    println!("{}", s); // Prints: world
+    
+    // s.push_str("world"); // COMPILE ERROR! This will NOT work because the underlying data is immutable.
+}
+```
+
+### 2. `let s = String::from("hello");` (Heap-Allocated String)
+
+When you write this, `s` is of type `String`.
+
+- **Memory Location:** The data for the string is allocated on the **heap** at runtime. The `String::from` function takes the hardcoded `"hello"` and copies it into a newly allocated chunk of heap memory.
+- **Mutability:** Because it's on the heap, a `String` can be modified (if you declare it as `let mut s`). You can append characters to it, change it, or shrink it.
+- **Size:** Its size can change dynamically at runtime. It has a capacity that can grow.
+- **Ownership:** The variable `s` owns this heap memory. When `s` goes out of scope, Rust will automatically deallocate that heap memory (drop it) to prevent memory leaks.
+
+```rust
+// Variable `s` points to the heap
+// Stack representation:
+// [ Pointer ] ----------> (Points to the HEAP)
+// [ Length: 5 ]
+// [ Capacity: 5 ]
+
+fn main() {
+    // 1. Create a heap-allocated String, and make it mutable
+    let mut s = String::from("hello"); 
+    
+    // 2. Now this works perfectly!
+    s.push_str(" world"); 
+    
+    println!("{}", s); // Prints: hello world
+}
+```

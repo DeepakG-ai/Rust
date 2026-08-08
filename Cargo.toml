@@ -19,5 +19,11 @@ path = "src/enum2.rs"
 [[bin]]
 name = "string"
 path = "src/string.rs"
+[[bin]]
+name = "shapes"
+path = "src/shapes.rs"
+[[bin]]
+name = "macro"
+path = "src/macro.rs"
 
 
