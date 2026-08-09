@@ -4,6 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+borsh = { version = "1.8.0", features = ["derive"] }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
 [[bin]]
 name = "borrow"
 path = "src/borrow.rs"
@@ -17,13 +20,22 @@ path = "src/enum.rs"
 name = "enum2"
 path = "src/enum2.rs"
 [[bin]]
-name = "string"
-path = "src/string.rs"
-[[bin]]
 name = "shapes"
 path = "src/shapes.rs"
 [[bin]]
 name = "macro"
 path = "src/macro.rs"
+[[bin]]
+name = "debug_display"
+path = "src/debug_display.rs"
+[[bin]]
+name = "serde_demo"
+path = "src/serde.rs"
+[[bin]]
+name = "borsh"
+path = "src/borsh.rs"
+[[bin]]
+name = "lifetime"
+path = "src/lifetime.rs"
 
 

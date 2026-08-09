@@ -645,3 +645,97 @@ fn main() {
     println!("{}", s); // Prints: hello world
 }
 ```
+##Macros : 2 types
+1. declarative macros: 
+      
+        println!,panic,vec!
+
+2. procedural macro:
+   1. custom macro
+   2. attirbute macro
+   3. function macro
+
+
+fn main(){
+    let user1= String::from("Deepak");
+    let user2 = user1
+    print!("{},{}",user1,user2) // this will raise error because user 1 and user 2. it is printing user1 which values is assigned to user2. owenership rules. let user2=&user1. it works because references
+}
+
+fn main(){
+    let user1= 2;
+    let user2=user1; //it will create copy for integer will value because they fixed and their size will not changed at runtime. string as stored in heap and size may be changed. 
+}
+
+heap is slow.stack is fast. and copying data from heap makes slow. that is why rust doesn't not copy of heap. it will allows only for stack. 
+
+##copy and clone traits
+#[derive(Debug)]
+
+struct User{
+    is_male:bool,
+    age:i32,
+}
+
+fn main(){
+    let u1=user{
+        is_male:true,
+        age:23,
+    };
+
+    let u2=u1;
+    print("{:?},{:?}",u1,u2)  //we can print like print("{}",u1.ismale) it works. but u1 is not works. we have implement impl Debug for User like this.. after only it works..otherwise not. so that is why we have called #[derive(Debug)].. 
+}
+
+problem : both is_male is boolean,and age is int. both will be stack. why it is not compiling. since not in heap. 
+
+answer: how do the rust knows in struct, they is bool and int present. 
+we have call #[derive(Copy,Clone)] here. by using Copy, it will know it has to copy the struct.. 
+
+#[derive(Debug,Copy,Clone)]
+struct User{
+    is_male:bool
+    age:u32
+    name:String // so here Copy will not work becuase string is on heap. not in stack. so we need to remove copy from macros #[derive(Debug,Clone)]
+}
+
+clone is help for creating another copy. 
+let u2=u1.clone; both will two variable. 
+
+#[derive(Debug, Copy, Clone)]  // ← tell Rust: this struct is safe to copy
+struct User {
+    is_male: bool,  // stack ✅
+    age: i32,       // stack ✅
+}
+
+fn main() {
+    let u1 = User { is_male: true, age: 23 };
+    let u2 = u1;    // ✅ COPIES (because we derived Copy)
+    println!("{:?}, {:?}", u1, u2); // ✅ both valid
+}
+
+Why Copy fails with String
+#[derive(Debug, Copy, Clone)]  // ❌ COMPILE ERROR
+struct User {
+    is_male: bool,
+    age: u32,
+    name: String,  // ← String is on HEAP, can't Copy!
+}
+
+Fix: remove Copy, keep Clone, and use .clone():
+#[derive(Debug, Clone)]  // ✅ only Clone, no Copy
+struct User {
+    is_male: bool,
+    age: u32,
+    name: String,
+}
+
+fn main() {
+    let u1 = User { is_male: true, age: 23, name: String::from("Deepak") };
+    let u2 = u1.clone();  // ← note: clone() with parentheses, it's a method call
+    println!("{:?}, {:?}", u1, u2); // ✅ both valid, two separate copies
+}
+
+ Rust can't just look inside a struct and figure out "oh all fields are stack types, let me copy." You have to explicitly tell Rust with #[derive(Copy, Clone)]. This is by design — it makes copies visible and intentional, not accidental.
+
+
