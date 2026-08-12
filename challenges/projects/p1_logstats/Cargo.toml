@@ -1,0 +1,12 @@
+[package]
+name = "p1_logstats"
+version.workspace = true
+edition.workspace = true
+
+[lib]
+name = "logstats"
+path = "src/lib.rs"
+
+[[bin]]
+name = "logstats"
+path = "src/main.rs"

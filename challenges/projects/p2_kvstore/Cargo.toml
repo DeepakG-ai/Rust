@@ -1,0 +1,8 @@
+[package]
+name = "p2_kvstore"
+version.workspace = true
+edition.workspace = true
+
+[lib]
+name = "kvstore"
+path = "src/lib.rs"

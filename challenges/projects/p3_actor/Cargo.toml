@@ -1,0 +1,15 @@
+[package]
+name = "p3_actor"
+version.workspace = true
+edition.workspace = true
+
+[lib]
+name = "metrics_actor"
+path = "src/lib.rs"
+
+[dependencies]
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["test-util"] }

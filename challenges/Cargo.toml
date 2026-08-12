@@ -1,0 +1,23 @@
+[workspace]
+resolver = "3"
+members = [
+    "exercises",
+    "projects/p1_logstats",
+    "projects/p2_kvstore",
+    "projects/p3_actor",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+
+[workspace.dependencies]
+tokio = { version = "1", features = [
+    "rt",
+    "rt-multi-thread",
+    "macros",
+    "sync",
+    "time",
+] }
+tokio-util = "0.7"
+futures = "0.3"
