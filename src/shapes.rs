@@ -27,10 +27,11 @@ fn main() {
         height: 20,
     };
     let c = Circle { radius: 10 };
+
     println!("Area of rectangle: {}", r.area());
     println!("Area of circle: {}", c.area());
-    //rintln!("Area of rectangle: {}", get_area(r));
-    //rintln!("Area of circle: {}", get_area(c));
+    //println!("Area of rectangle: {}", get_area(r));
+    //println!("Area of circle: {}", get_area(c));
 }
 // get_area(s: impl Shape) -> u32 {
 // return s.area();
