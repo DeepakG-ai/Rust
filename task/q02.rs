@@ -3,6 +3,7 @@ fn main() {
     for c in temps {
         println!("{}", describe(c));
     }
+    
 }
 
 fn celsius_to_fahrenheit(c: f64) -> f64 {
@@ -18,3 +19,4 @@ fn describe(c: f64) -> String {
     let label = if is_freezing(c) { "freezing" } else { "not freezing" };
     format!("{c}C = {f}F ({label})")
 }
+ 

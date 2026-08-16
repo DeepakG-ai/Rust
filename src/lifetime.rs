@@ -12,3 +12,5 @@ fn longest<'a>(s1: &'a String, s2: &'a String) -> &'a String {
         return s2;
     }
 }
+
+//this function we can't write, without lifetimes.

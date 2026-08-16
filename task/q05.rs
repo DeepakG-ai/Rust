@@ -5,7 +5,7 @@ struct Employee {
 }
 
 impl Employee {
-    // Associated constructor function
+    // new is similiar to constructor, but it will not call automatically.
     fn new(name: &str, monthly_salary: f64, years: u32) -> Employee {
         Employee {
             name: name.to_string(),
@@ -14,6 +14,7 @@ impl Employee {
         }
     }
 
+    
     // Methods borrow `self` via `&self` to read struct fields
     fn annual_salary(&self) -> f64 {
         self.monthly_salary * 12.0

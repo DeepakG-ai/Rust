@@ -38,4 +38,94 @@ path = "src/borsh.rs"
 name = "lifetime"
 path = "src/lifetime.rs"
 
+# Task questions (Q1 to Q22)
+[[bin]]
+name = "q01"
+path = "task/q01.rs"
+
+[[bin]]
+name = "q02"
+path = "task/q02.rs"
+
+[[bin]]
+name = "q03"
+path = "task/q03.rs"
+
+[[bin]]
+name = "q04"
+path = "task/q04.rs"
+
+[[bin]]
+name = "q05"
+path = "task/q05.rs"
+
+[[bin]]
+name = "q06"
+path = "task/q06.rs"
+
+[[bin]]
+name = "q07"
+path = "task/q07.rs"
+
+[[bin]]
+name = "q08"
+path = "task/q08.rs"
+
+[[bin]]
+name = "q09"
+path = "task/q09.rs"
+
+[[bin]]
+name = "q10"
+path = "task/q10.rs"
+
+[[bin]]
+name = "q11"
+path = "task/q11.rs"
+
+[[bin]]
+name = "q12"
+path = "task/q12.rs"
+
+[[bin]]
+name = "q13"
+path = "task/q13.rs"
+
+[[bin]]
+name = "q14"
+path = "task/q14.rs"
+
+[[bin]]
+name = "q15"
+path = "task/q15.rs"
+
+[[bin]]
+name = "q16"
+path = "task/q16.rs"
+
+[[bin]]
+name = "q17"
+path = "task/q17.rs"
+
+[[bin]]
+name = "q18"
+path = "task/q18.rs"
+
+[[bin]]
+name = "q19"
+path = "task/q19.rs"
+
+[[bin]]
+name = "q20"
+path = "task/q20.rs"
+
+[[bin]]
+name = "q21"
+path = "task/q21.rs"
+
+[[bin]]
+name = "q22"
+path = "task/q22.rs"
+
+
 

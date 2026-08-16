@@ -1,0 +1,59 @@
+trait Describe{
+    fn describe(&self)->String;
+
+    fn short_label(&self)->String{
+        format!("<{}>",self.describe())
+    }
+}
+
+struct Employee{
+    name : String,
+    monthly_salary:f64,
+}
+
+impl Describe for Employee{
+    fn describe(&self)->String{
+        format!("{} earns per month {}",self.name, self.monthly_salary)
+    }
+
+    fn short_label(&self)->String{
+        format!("<{}>",self.describe())
+    }
+}
+
+
+struct Product{
+    name:String,
+    price:f64
+}
+
+impl Describe for Product{
+    fn describe(&self)->String{
+        format!("{} price is {}",self.name,self.price
+        )
+    }
+
+    fn short_label(&self)->String{
+        format!("${:.2}",self.price)
+    }
+}
+
+
+fn main (){
+    let e = Employee{
+        name : String::from("Deepak"),
+        monthly_salary:50000.0,
+
+    };
+
+    let p = Product{
+        name:String::from("Laptop"),
+        price:52400.0,
+    };
+
+    println!("{}", e.short_label()); 
+    println!("{}", p.short_label());
+
+}
+
+
