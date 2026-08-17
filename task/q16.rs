@@ -1,3 +1,9 @@
 fn main() {
-    // Q16 - iterators
+    let v1 = vec![1, 2, 3];
+
+    let v1_iter = v1.iter().sum();
+
+    println!("{}",v1_iter)
+
 }
+
