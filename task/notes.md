@@ -448,4 +448,120 @@ fn main() {
 #### Python vs Rust Scope Boundary:
 - **Python:** Variables created inside `if` or `for` blocks leak and stay alive throughout the whole function.
 - **Rust:** Every `{ }` is a strict memory boundary. When the block ends `}`, everything declared inside is automatically freed unless moved out.
+
+---
+
+### Dereference (`*`) and Destructure (`&` in patterns)
+
+#### What you already know
+```rust
+let n = 10;        // owned value (i32)
+let r = &n;        // reference to n (&i32)
+```
+
+Most of the time, Rust **automatically follows references** for you — printing, method calls, comparisons all just work:
+```rust
+println!("{}", r);       // ✅ Rust auto-handles it
+println!("{}", n);       // ✅ same output
+
+if r > &5 { }           // ✅ Rust auto-handles comparison
+r.is_positive();        // ✅ Rust auto-handles method calls
+```
+
+#### When Rust can't auto-handle it — you need dereference (`*`)
+
+**Dereference = "follow the reference, give me the real value"**
+
+```rust
+let n = 10;
+let r = &n;         // r is &i32, not i32
+
+let result = r + 5;   // ❌ ERROR: can't add &i32 + i32
+let result = *r + 5;  // ✅ *r gives you the i32 value → 10 + 5 = 15
+```
+
+Each `*` peels off one `&`:
+```
+&i32   →  *r   →  i32       (one reference, one *)
+&&i32  →  **r  →  i32       (two references, two *)
+```
+
+#### Why `&&` (reference to a reference) happens inside `.filter()`
+
+```rust
+let numbers = vec![10, 20, 30];
+
+// Step 1: .iter() already gives &i32 (borrows each element)
+// Step 2: .filter() adds ANOTHER & (it borrows the iterator item to test it)
+// Result: closure receives &&i32
+
+numbers.iter().filter(|n| {
+    // n is &&i32 here (two layers of reference)
+    **n > 5    // peel both layers to get the plain i32
+});
+```
+
+Think of it as following two arrows:
+```
+n  →  points to  →  &i32  →  points to  →  i32 (the actual 10)
+       first *                  second *
+```
+
+#### Destructuring — same thing, different place
+
+Instead of using `*` inside the body, you can unwrap references **right in the parameter**:
+
+```rust
+let r = &10;
+
+// Way 1: receive the reference, use * inside
+let val = *r;       // val is i32 = 10
+
+// Way 2: unwrap it when receiving (destructure)
+let &val = r;       // val is i32 = 10 (the & in the pattern removes one layer)
+```
+
+**Destructuring is just dereferencing done at the parameter.** Same result.
+
+#### Three ways to write the same `.filter()` — all identical
+
+```rust
+// The closure receives &&i32. All three approaches produce the same output:
+
+// Approach 1: peel nothing at parameter, peel both in body
+.filter(|n| **n > 10)
+//       n = &&i32
+//       *n = &i32    (peeled one)
+//       **n = i32    (peeled both) → compare with 10 ✅
+
+// Approach 2: peel one at parameter, peel one in body
+.filter(|&n| *n > 10)
+//       n = &i32     (peeled one at the door)
+//       *n = i32     (peeled the second inside) ✅
+
+// Approach 3: peel both at parameter, nothing in body
+.filter(|&&n| n > 10)
+//       n = i32      (peeled both at the door)
+//       just use n directly ✅
+```
+
+#### Quick reference: when do you need `*`?
+
+| Situation | Need `*`? |
+|---|---|
+| `println!("{}", r)` | No, Rust handles it |
+| `r.len()`, `r.is_empty()` | No, Rust handles it |
+| `if r > &5` | No, Rust handles it |
+| `r + 5` (math operations) | **Yes** → `*r + 5` |
+| `&&i32` inside `.filter()` | **Yes** → `**n > 5` or `\|&&n\| n > 5` |
+
+**Simple rule:** if the compiler says "expected `i32`, found `&i32`" — add `*`. If it says `&&i32` — add `**`.
+
+#### Recommendation for beginners
+
+Just use `**` inside the body. No fancy patterns needed:
+```rust
+.filter(|n| **n > 10)      // simple and clear
+.filter(|n| **n % 2 == 0)  // same pattern
+```
 

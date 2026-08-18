@@ -7,6 +7,8 @@ edition = "2024"
 borsh = { version = "1.8.0", features = ["derive"] }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.151"
+tokio = { version = "1.43", features = ["full"] }
+axum = "0.8"
 [[bin]]
 name = "borrow"
 path = "src/borrow.rs"
@@ -38,7 +40,7 @@ path = "src/borsh.rs"
 name = "lifetime"
 path = "src/lifetime.rs"
 
-# Task questions (Q1 to Q22)
+# Task questions (Q1 to Q25)
 [[bin]]
 name = "q01"
 path = "task/q01.rs"
@@ -126,6 +128,18 @@ path = "task/q21.rs"
 [[bin]]
 name = "q22"
 path = "task/q22.rs"
+
+[[bin]]
+name = "q23"
+path = "task/q23.rs"
+
+[[bin]]
+name = "q24"
+path = "task/q24.rs"
+
+[[bin]]
+name = "q25"
+path = "task/q25.rs"
 
 
 

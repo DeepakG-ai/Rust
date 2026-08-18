@@ -1,7 +1,7 @@
 # Rust Tasks — solve one at a time
 
-22 questions. Basics first, LeetCode at the end. No external crates needed for
-any of them — everything uses `std`.
+25 questions. Basics first, LeetCode in the middle, Async & Web with Tokio + Axum at the end.
+Q1–Q22 use only standard library `std`. Q23–Q25 introduce Tokio & Axum.
 
 ---
 
@@ -562,6 +562,97 @@ This is the hardest one here. Get Q20 and Q21 done first.
 
 ---
 
+# Part 5 — Async & Web Backend: Tokio & Axum (Q23–Q25)
+
+## Q23 — Tokio basics (`async`, `await`, and `tokio::spawn`)
+
+In Rust, `async fn` does **not** run on its own like Python's `asyncio` or JavaScript. It produces a `Future` that sits idle until driven by an async runtime (Tokio) using `.await`.
+
+Write a program using `#[tokio::main]`:
+
+1. Write `async fn fetch_user_data(user_id: u32, delay_ms: u64) -> String` that:
+   - sleeps asynchronously with `tokio::time::sleep(tokio::time::Duration::from_millis(delay_ms)).await`
+   - returns `format!("User {user_id} data loaded")`
+
+2. In `main`:
+   - spawn 3 concurrent tasks with `tokio::spawn` for IDs `1`, `2`, `3` with delays `300ms`, `100ms`, `200ms`
+   - await all three `JoinHandle` results
+   - print the elapsed time and results
+
+Notice how User 2 (100ms) finishes first, then User 3 (200ms), then User 1 (300ms) — total runtime is ~300ms, not 600ms!
+
+*Hint: `tokio::spawn` moves the future to Tokio's background thread pool. It returns a `JoinHandle<T>` which yields `Result<T, JoinError>` when `.await`ed.*
+
+---
+
+## Q24 — Axum REST API (Router, Handlers, JSON)
+
+Axum is Rust's most popular web framework (built on Tokio and Tower).
+
+Write an HTTP web server in `q24.rs`:
+
+```rust
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct User {
+    id: u64,
+    name: String,
+    role: String,
+}
+```
+
+Routes to implement:
+- `GET /` → returns plain text `"Welcome to Rust Axum Server!"`
+- `GET /users/:id` → extracts the path parameter `:id` using `Path(id): Path<u64>` and returns `Json(User { id, name: "Alice".into(), role: "Admin".into() })`
+- `POST /users` → receives `Json<User>` payload, prints `"Created user: {user:?}"`, and returns `(StatusCode::CREATED, Json(user))`
+
+In `main`:
+- build the `Router::new()`
+- bind to `127.0.0.1:3000` with `tokio::net::TcpListener::bind("127.0.0.1:3000").await`
+- start the server with `axum::serve(listener, app).await`
+
+*Hint: Axum handlers are plain async functions. Parameters like `Path(id)` and `Json(payload)` are called **Extractors** — Axum automatically parses request data based on their types!*
+
+---
+
+## Q25 — Axum In-Memory CRUD with Shared State (`Arc<Mutex<HashMap>>`)
+
+Web servers handle multiple requests at the same time on different threads. To safely share mutable data (like an in-memory database) across handlers, Rust uses `Arc<Mutex<T>>`.
+
+Build a complete In-Memory **Todo CRUD API**:
+
+```rust
+#[derive(Serialize, Deserialize, Clone, Debug)]
+struct Todo {
+    id: u64,
+    title: String,
+    completed: bool,
+}
+
+#[derive(Deserialize)]
+struct CreateTodo {
+    title: String,
+}
+
+// Shared thread-safe in-memory database
+type AppState = Arc<Mutex<HashMap<u64, Todo>>>;
+```
+
+Endpoints to implement:
+- `GET /todos` → returns `Json<Vec<Todo>>` of all current todos
+- `POST /todos` → accepts `Json<CreateTodo>`, generates the next `id`, inserts into the `HashMap`, and returns `(StatusCode::CREATED, Json(new_todo))`
+- `DELETE /todos/:id` → removes the item with `:id` from the `HashMap`. Returns `StatusCode::NO_CONTENT` (204) if found, or `StatusCode::NOT_FOUND` (404) if missing.
+
+In `main`:
+- create state: `let state: AppState = Arc::new(Mutex::new(HashMap::new()));`
+- attach state to router: `Router::new().route(...).with_state(state)`
+- run server on port `3000`
+
+*Hint: `use std::sync::{Arc, Mutex};` and `axum::extract::State`. Inside handlers, use `let mut db = state.lock().unwrap();` to access the `HashMap`.*
+
+---
+
 ## Progress
 
 - [ ] Q1 for loop
@@ -586,9 +677,13 @@ This is the hardest one here. Get Q20 and Q21 done first.
 - [ ] Q20 Two Sum
 - [ ] Q21 Valid Anagram
 - [ ] Q22 Number of Islands
+- [ ] Q23 Tokio async & spawn
+- [ ] Q24 Axum router & JSON API
+- [ ] Q25 Axum shared state CRUD
 
 ---
 
 **When you get stuck:** paste the compiler error and ask what it means. Ask
 for a hint, not the answer. The error messages are long because the fix is
 usually inside them.
+

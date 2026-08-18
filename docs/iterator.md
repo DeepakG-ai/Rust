@@ -1,19 +1,20 @@
-# Iterators in Rust
+# Master Guide to Rust Iterators: From First Principles to Production Patterns
 
-## What is an Iterator?
-
-An iterator is simply a thing that gives you **one item at a time** from a collection.
+This document covers everything about Rust Iterators—from foundational concepts to under-the-hood mechanics (`.collect()`, `.filter_map()`) and production patterns extracted from real-world codebases like **OpenAI Codex** and **xAI Grok**.
 
 ---
 
-## First Principles: Before Iterators
+## 1. What is an Iterator?
 
-Without iterators, you loop with an index:
+An iterator is an object that yields **one item at a time** from a sequence or data source.
+
+### First Principles: Before Iterators
+Without iterators, loops require manual index management:
 
 ```rust
 let names = vec!["Deepak", "Ravi", "Gowda"];
 
-// Manual way — YOU manage the index
+// Manual index management
 let mut i = 0;
 while i < names.len() {
     println!("{}", names[i]);
@@ -21,255 +22,562 @@ while i < names.len() {
 }
 ```
 
-**Problems with this:**
-- You manage `i` yourself → easy to make off-by-one bugs (`i <= names.len()` 💀)
-- You directly access memory by index → risk of going out of bounds
-- Verbose and repetitive
+**Problems with manual loops:**
+1. **Off-by-one errors**: Easy to accidentally write `i <= names.len()` and panic.
+2. **Bounds checking overhead**: Every `names[i]` access performs runtime bounds checking.
+3. **State clutter**: You manually track index variable `i`.
 
----
-
-## With Iterators
-
+### With Iterators
 ```rust
 let names = vec!["Deepak", "Ravi", "Gowda"];
 
-// Iterator way — IT manages the position
 for name in names.iter() {
     println!("{}", name);
 }
 ```
-
-**You just say "give me the next item" and it handles everything.** No index, no bounds checking, no bugs.
+* **Safe**: No index tracking, no bounds-check panics.
+* **Declarative**: Focuses on *what* to do per item, not *how* to step through memory.
 
 ---
 
-## How it works internally
+## 2. How Iterators Work Internally (`next()`)
 
-Every iterator in Rust implements one method: **`next()`**
+In Rust, every iterator implements the standard `std::iter::Iterator` trait. At its core, the trait requires only one method: **`next()`**.
 
 ```rust
-let names = vec!["Deepak", "Ravi", "Gowda"];
+pub trait Iterator {
+    type Item;
+
+    fn next(&mut self) -> Option<Self::Item>;
+    
+    // ... plus 70+ default adapter methods (.map, .filter, .collect, etc.)
+}
+```
+
+Calling `next()` steps forward and returns `Some(item)` if an element exists, or `None` when the sequence ends:
+
+```rust
+let names = vec!["Deepak", "Ravi"];
 let mut iter = names.iter();
 
-iter.next()  // → Some("Deepak")   ← first item
-iter.next()  // → Some("Ravi")     ← second item
-iter.next()  // → Some("Gowda")    ← third item
-iter.next()  // → None             ← done, no more items
+assert_eq!(iter.next(), Some(&"Deepak"));
+assert_eq!(iter.next(), Some(&"Ravi"));
+assert_eq!(iter.next(), None); // Sequence finished!
 ```
-
-That's it. An iterator is just something with a `next()` method that returns `Some(item)` or `None`.
 
 ---
 
-## The Real Power: Chaining
+## 3. The Three Types of Iteration
 
-This is where iterators become amazing:
+How you iterate depends on whether you want to **borrow**, **mutably borrow**, or **consume** (move) the data:
+
+| Method | Item Type | Original Collection State | Common Use Case |
+| :--- | :--- | :--- | :--- |
+| **`.iter()`** | `&item` (immutable ref) | ✅ Preserved (borrowed) | Reading / searching without modifying |
+| **`.iter_mut()`** | `&mut item` (mutable ref) | ✅ Preserved (modified in-place) | Updating elements in-place |
+| **`.into_iter()`** | `item` (owned value) | ❌ Consumed (moved) | Transforming or transferring ownership |
 
 ```rust
-let numbers = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+let mut names = vec!["Deepak".to_string(), "Ravi".to_string()];
 
-// Get sum of squares of even numbers
-let result: i32 = numbers.iter()
-    .filter(|n| *n % 2 == 0)     // keep only even: [2, 4, 6, 8, 10]
-    .map(|n| n * n)               // square them: [4, 16, 36, 64, 100]
-    .sum();                        // add them: 220
+// 1. Borrowing (.iter())
+for name in names.iter() {
+    println!("Length of {}: {}", name, name.len());
+}
+
+// 2. Mutable Borrowing (.iter_mut())
+for name in names.iter_mut() {
+    name.push_str(" (Verified)");
+}
+
+// 3. Consuming (.into_iter())
+for name in names.into_iter() {
+    // `names` is moved here and cannot be used after this loop!
+    println!("Moved: {}", name);
+}
 ```
 
-Without iterators, this would be:
+### `for` Loop Desugaring
+In Rust, a `for` loop is syntax sugar for `.into_iter()`:
+
 ```rust
-let mut result = 0;
-let mut i = 0;
-while i < numbers.len() {
-    if numbers[i] % 2 == 0 {
-        result += numbers[i] * numbers[i];
+let names = vec!["Deepak", "Ravi"];
+
+// These are identical:
+for name in names { }              // Sugar for names.into_iter() (consumes vec)
+for name in names.into_iter() { }
+
+// Borrowing syntax sugar:
+for name in &names { }             // Sugar for names.iter()
+for name in &mut names { }        // Sugar for names.iter_mut()
+```
+
+---
+
+## 4. Key Combinator Methods
+
+### Transformation & Filtering
+
+| Method | Purpose | Example |
+| :--- | :--- | :--- |
+| **`.map(f)`** | Transform every item | `(1..3).map(|x| x * 2)` $\rightarrow$ `[2, 4]` |
+| **`.filter(p)`** | Keep items matching predicate | `(1..5).filter(|x| x % 2 == 0)` $\rightarrow$ `[2, 4]` |
+| **`.filter_map(f)`** | Combined filter + map (returns `Option`) | `strings.iter().filter_map(|s| s.parse().ok())` |
+| **`.flat_map(f)`** | Map item to iterator and flatten | `words.iter().flat_map(|w| w.split(' '))` |
+| **`.enumerate()`** | Pair items with index `(index, item)` | `vec.iter().enumerate()` |
+| **`.zip(other)`** | Pair elements from two iterators | `a.iter().zip(b.iter())` $\rightarrow$ `[(a0, b0), (a1, b1)]` |
+| **`.chain(other)`** | Append two iterators end-to-end | `a.iter().chain(b.iter())` |
+| **`.take(n)`** | Take first `n` items | `(1..100).take(3)` $\rightarrow$ `[1, 2, 3]` |
+| **`.skip(n)`** | Skip first `n` items | `(1..5).skip(2)` $\rightarrow$ `[3, 4]` |
+| **`.peekable()`** | Enable `peek()` without advancing | `let mut iter = vec.iter().peekable();` |
+| **`.by_ref()`** | Borrow iterator to preserve ownership | `iter.by_ref().take(3)` |
+
+### Consumption & Reduction
+
+| Method | Purpose | Return Value |
+| :--- | :--- | :--- |
+| **`.collect()`** | Gather elements into a collection (`Vec`, `String`, etc.) | `Container<T>` or `Result<Container<T>, E>` |
+| **`.fold(init, f)`** | Custom reduction with initial accumulator | `AccumulatorType` |
+| **`.sum()` / `.product()`** | Sum or multiply all numbers | Numeric type |
+| **`.count()`** | Count total items | `usize` |
+| **`.find(p)`** | Return first item matching predicate | `Option<Item>` |
+| **`.position(p)`** | Index of first matching item | `Option<usize>` |
+| **`.any(p)` / `.all(p)`** | Check if any/all items match predicate | `bool` |
+
+---
+
+## 5. `.collect()` — The Universal Consumer
+
+Iterator adapters like `.map()` and `.filter()` are **lazy** — they build a pipeline but do nothing until a **consumer** drives it. `.collect()` is the most common consumer: it runs the iterator and packs every yielded element into a concrete collection (`Vec`, `String`, `HashSet`, `HashMap`, etc.).
+
+### Two ways to specify the target type
+
+Rust needs to know *what* collection you want. Two ways:
+
+```rust
+// Method 1: Type annotation on the variable
+let numbers: Vec<i32> = (1..=5).collect();
+
+// Method 2: Turbofish on collect
+let numbers = (1..=5).collect::<Vec<i32>>();
+```
+
+### Example: filter & transform into a Vec
+
+```rust
+fn main() {
+    let numbers = vec![1, 2, 3, 4, 5, 6];
+
+    let even_multiplied: Vec<i32> = numbers
+        .into_iter()
+        .filter(|x| x % 2 == 0) // Keeps: 2, 4, 6
+        .map(|x| x * 10)         // Transforms to: 20, 40, 60
+        .collect();             // Packs them into a Vec<i32>
+
+    println!("{:?}", even_multiplied); // Output: [20, 40, 60]
+}
+```
+
+### Example: collecting characters into a String
+
+```rust
+fn main() {
+    let text = "Hello 2026 World!";
+
+    // Filter out digits and collect remaining chars into a String
+    let letters_only: String = text
+        .chars()
+        .filter(|c| !c.is_numeric())
+        .collect();
+
+    println!("{}", letters_only); // Output: "Hello  World!"
+}
+```
+
+### Example: collecting tuples into a HashMap
+
+If the iterator yields `(key, value)` tuples, `.collect()` can build a `HashMap`:
+
+```rust
+use std::collections::HashMap;
+
+fn main() {
+    let fruit_list = vec![("Apple", 3), ("Banana", 5), ("Orange", 2)];
+
+    let inventory: HashMap<&str, i32> = fruit_list.into_iter().collect();
+
+    println!("{:?}", inventory);
+    // Output: {"Apple": 3, "Banana": 5, "Orange": 2}
+}
+```
+
+### Example: collecting Results (stop on first error)
+
+When every item is a `Result`, collecting into `Result<Vec<T>, E>` short-circuits on the first `Err`:
+
+```rust
+fn main() {
+    let valid_inputs = vec!["10", "20", "30"];
+    let invalid_inputs = vec!["10", "abc", "30"];
+
+    // Case A: All inputs are valid numbers -> Returns Ok(Vec[10, 20, 30])
+    let parsed_ok: Result<Vec<i32>, _> = valid_inputs
+        .into_iter()
+        .map(|s| s.parse::<i32>())
+        .collect();
+    println!("{:?}", parsed_ok); // Output: Ok([10, 20, 30])
+
+    // Case B: Contains an invalid string -> Short-circuits & returns Err!
+    let parsed_err: Result<Vec<i32>, _> = invalid_inputs
+        .into_iter()
+        .map(|s| s.parse::<i32>())
+        .collect();
+    println!("{:?}", parsed_err); // Output: Err(ParseIntError { ... })
+}
+```
+
+### Cheat sheet
+
+| Iterator item | Target type | Syntax |
+|---|---|---|
+| `T` | `Vec<T>` | `iter.collect::<Vec<_>>()` |
+| `char` or `&str` | `String` | `iter.collect::<String>()` |
+| `(K, V)` | `HashMap<K, V>` | `iter.collect::<HashMap<_, _>>()` |
+| `T` | `HashSet<T>` | `iter.collect::<HashSet<_>>()` |
+| `Result<T, E>` | `Result<Vec<T>, E>` | `iter.collect::<Result<Vec<_>, _>>()` |
+
+### Under the hood
+
+`.collect()` is powered by **trait delegation**, **`size_hint()` pre-allocation**, and **compiler specialization**.
+
+**Trait delegation** — `.collect()` delegates to `FromIterator::from_iter`:
+
+```rust
+fn collect<B: FromIterator<Self::Item>>(self) -> B where Self: Sized {
+    FromIterator::from_iter(self)
+}
+```
+
+**Memory pre-allocation** — When collecting into `Vec<T>`, Rust queries `size_hint()`. If the iterator knows its length (e.g. from a slice), `Vec::with_capacity(n)` pre-allocates in a single allocation, eliminating repeated resizing.
+
+**Short-circuiting** — When collecting `Result<T, E>` items, the moment `next()` yields `Err(e)`, iteration stops immediately, the partial collection is dropped via RAII, and `Err(e)` is returned.
+
+---
+
+## 6. `.filter_map()` — Filter + Map in One Pass
+
+`.filter_map()` combines `.filter()` and `.map()` in a **single pass**. The closure returns `Option<T>`:
+
+- `Some(value)` → keep the item, output `value`
+- `None` → discard the item
+
+### Why not just `.filter().map()`?
+
+When filtering depends on the same computation as mapping, separate steps force you to compute twice (or use an ugly `.unwrap()`):
+
+```rust
+// Cluttered: parses twice
+let strings = vec!["10", "abc", "20", "xyz"];
+
+let numbers: Vec<i32> = strings
+    .into_iter()
+    .filter(|s| s.parse::<i32>().is_ok()) // Check 1
+    .map(|s| s.parse::<i32>().unwrap())   // Check 2 (duplicate work!)
+    .collect();
+```
+
+With `.filter_map()` — one parse, no unwrap:
+
+```rust
+let strings = vec!["10", "abc", "20", "xyz"];
+
+let numbers: Vec<i32> = strings
+    .into_iter()
+    .filter_map(|s| s.parse::<i32>().ok()) // Parses ONCE!
+    .collect();
+
+println!("{:?}", numbers); // Output: [10, 20]
+```
+
+### Example: discarding errors with `Result::ok`
+
+Pass `Result::ok` directly — it converts `Ok(x)` → `Some(x)` and `Err(_)` → `None`:
+
+```rust
+fn main() {
+    let results: Vec<Result<i32, &str>> = vec![
+        Ok(100),
+        Err("Disk Full"),
+        Ok(200),
+        Err("Network Timeout"),
+        Ok(300),
+    ];
+
+    // Keep only the Ok values!
+    let successes: Vec<i32> = results
+        .into_iter()
+        .filter_map(Result::ok) // Converts Ok(x) -> Some(x), Err(_) -> None
+        .collect();
+
+    println!("{:?}", successes); // Output: [100, 200, 300]
+}
+```
+
+### Example: extracting specific enum variants
+
+```rust
+enum UserEvent {
+    Login(String),
+    Logout,
+    Message(String),
+}
+
+fn main() {
+    let events = vec![
+        UserEvent::Login("Alice".to_string()),
+        UserEvent::Logout,
+        UserEvent::Message("Hello!".to_string()),
+        UserEvent::Message("How are you?".to_string()),
+    ];
+
+    // Extract ONLY the chat message strings
+    let chat_messages: Vec<String> = events
+        .into_iter()
+        .filter_map(|event| match event {
+            UserEvent::Message(msg) => Some(msg), // Keep message payload
+            _ => None,                             // Discard Login & Logout
+        })
+        .collect();
+
+    println!("{:?}", chat_messages);
+    // Output: ["Hello!", "How are you?"]
+}
+```
+
+### Under the hood
+
+```rust
+pub struct FilterMap<I, F> {
+    iter: I,
+    f: F,
+}
+
+impl<B, I: Iterator, F> Iterator for FilterMap<I, F>
+where
+    F: FnMut(I::Item) -> Option<B>,
+{
+    type Item = B;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some(x) = self.iter.next() {
+            if let Some(y) = (self.f)(x) {
+                return Some(y); // Yields transformed item immediately
+            }
+        }
+        None // Iterator exhausted
     }
-    i += 1;
 }
 ```
 
+### Comparison
+
+| Method | Closure returns | Behavior |
+|---|---|---|
+| `.filter()` | `bool` | Keeps item if `true`, discards if `false`. Item type unchanged. |
+| `.map()` | `T` | Transforms every item. Count unchanged. |
+| `.filter_map()` | `Option<T>` | `None` → discard, `Some(val)` → keep & transform in one step. |
+
 ---
 
-## Three Types of Iteration
+## 7. Advanced Combinators: `.peekable()` & `.by_ref()`
 
-| Method | What you get | Original collection |
-|:---|:---|:---|
-| `.iter()` | `&item` (reference) | ✅ Kept (borrowed) |
-| `.iter_mut()` | `&mut item` (mutable ref) | ✅ Kept (can modify items) |
-| `.into_iter()` | `item` (owned) | ❌ Consumed (moved) |
+### `.peekable()` for Parsers & Lexers
+Allows inspecting the next item without consuming it:
 
 ```rust
-let names = vec!["Deepak", "Ravi"];
+let mut chars = "a=10;".chars().peekable();
 
-for n in names.iter()      { }  // borrows — names still usable after
-for n in names.into_iter() { }  // moves — names is GONE after this
+while let Some(&c) = chars.peek() {
+    if c.is_alphabetic() {
+        println!("Found letter: {}", chars.next().unwrap());
+    } else {
+        chars.next();
+    }
+}
+```
+
+### `.by_ref()` for Partial Stream Iteration
+`by_ref()` borrows an iterator temporarily so you can use methods like `.take()` without losing ownership of the main iterator:
+
+```rust
+let mut numbers = vec![1, 2, 3, 4, 5, 6].into_iter();
+
+// Take first 2 items
+let first_two: Vec<_> = numbers.by_ref().take(2).collect(); // [1, 2]
+
+// Remaining items are STILL accessible in `numbers`!
+let rest: Vec<_> = numbers.collect(); // [3, 4, 5, 6]
 ```
 
 ---
 
-## `for` Loop IS an Iterator in Disguise
+## 8. API Design with `impl Iterator<Item = T>`
+
+In production Rust codebases (like OpenAI Codex & xAI Grok), functions return `impl Iterator<Item = T>` rather than allocating vectors:
 
 ```rust
-let names = vec!["Deepak", "Ravi"];
-
-// These two are EXACTLY the same:
-for name in names { }              // sugar for...
-for name in names.into_iter() { }  // this (consumes the vec)
-
-// If you want to borrow:
-for name in &names { }             // sugar for names.iter()
-for name in &mut names { }        // sugar for names.iter_mut()
+// Zero-allocation public API!
+pub fn sanitize_tokens(raw: &str) -> impl Iterator<Item = &str> {
+    raw.split(',')
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty())
+}
 ```
 
----
-
-## Key Iterator Methods
-
-### Transform & Filter
-
-| Method | What it does |
-|:---|:---|
-| `.map(fn)` | Transform each item |
-| `.filter(fn)` | Keep items that match a condition |
-| `.flat_map(fn)` | Map + flatten nested results |
-| `.enumerate()` | Get `(index, item)` pairs |
-| `.zip(other)` | Pair items from two iterators |
-| `.chain(other)` | Join two iterators together |
-| `.take(n)` | Take only first n items |
-| `.skip(n)` | Skip first n items |
-| `.rev()` | Reverse the iterator |
-
-### Consume & Collect
-
-| Method | What it does |
-|:---|:---|
-| `.collect()` | Gather results into a Vec, String, etc. |
-| `.sum()` | Add all items together |
-| `.count()` | How many items |
-| `.fold(init, fn)` | Reduce all items to one value (custom accumulator) |
-
-### Search & Check
-
-| Method | What it does | Example |
-|:---|:---|:---|
-| `.find(fn)` | First matching item | `v.iter().find(|x| **x > 3)` → `Some(&4)` |
-| `.any(fn)` | Is ANY item matching? | `v.iter().any(|x| *x == 5)` → `true` |
-| `.all(fn)` | Do ALL items match? | `v.iter().all(|x| *x > 0)` → `true` |
-| `.position(fn)` | Index of first match | `v.iter().position(|x| *x == 3)` → `Some(2)` |
+### Benefits:
+1. **Zero Heap Allocations**: No intermediate `Vec` is created.
+2. **Encapsulated Types**: Hides ugly concrete iterator type signatures (`Filter<Map<Split<...>>>`).
+3. **Lazy Execution**: Callers process items on-demand.
 
 ---
 
-## Examples of Less Common Methods
+## 9. Production Custom Iterator Patterns (From Codex & Grok)
+
+Only implement a custom iterator `struct` when standard combinators (`.map`, `.filter`) cannot encapsulate complex state.
+
+### Pattern A: Custom Iterator Adapter (AST Event Merging)
+* **Real Project Example**: `DecodedTextMerge` in [OpenAI Codex](file:///C:/Users/aigroup5/PycharmProjects/codex/codex-rs/tui/src/markdown_text_merge.rs#L25)
+* **Goal**: Merge adjacent text events from a Markdown parser while updating source byte ranges.
 
 ```rust
-// fold — like sum() but custom (manual accumulator)
-let sum = vec![1, 2, 3].iter().fold(0, |acc, x| acc + x);  // 6
+use std::iter::Peekable;
+use std::ops::Range;
+use pulldown_cmark::Event;
 
-// flat_map — flatten nested structures
-let words = vec!["hello world", "foo bar"];
-let split: Vec<&str> = words.iter()
-    .flat_map(|s| s.split(' '))
-    .collect();  // ["hello", "world", "foo", "bar"]
-
-// chain — combine two iterators
-let a = vec![1, 2];
-let b = vec![3, 4];
-let all: Vec<_> = a.iter().chain(b.iter()).collect();  // [1, 2, 3, 4]
-
-// enumerate — get index + item
-for (i, name) in vec!["Deepak", "Ravi"].iter().enumerate() {
-    println!("{}: {}", i, name);  // 0: Deepak, 1: Ravi
+pub(crate) struct DecodedTextMerge<I: Iterator> {
+    iter: Peekable<I>,
 }
 
-// zip — pair two iterators
-let names = vec!["Deepak", "Ravi"];
-let ages = vec![25, 30];
-let pairs: Vec<_> = names.iter().zip(ages.iter()).collect();
-// [("Deepak", 25), ("Ravi", 30)]
+impl<'a, I> Iterator for DecodedTextMerge<I>
+where
+    I: Iterator<Item = (Event<'a>, Range<usize>)>,
+{
+    type Item = (Event<'a>, Range<usize>);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let (event, mut range) = self.iter.next()?;
+        let Event::Text(text) = event else {
+            return Some((event, range));
+        };
+
+        // If next event is also text, merge them!
+        let mut merged = text.into_string();
+        while matches!(self.iter.peek(), Some((Event::Text(_), _))) {
+            let Some((Event::Text(next_text), next_range)) = self.iter.next() else { break; };
+            merged.push_str(&next_text);
+            range.end = next_range.end;
+        }
+        Some((Event::Text(merged.into()), range))
+    }
+}
 ```
 
----
-
-## `collect()` Turbofish Syntax
-
-`collect()` can build different types — you tell it WHAT to build:
+### Pattern B: Graph / Tree Traversal Iterator
+* **Real Project Example**: `ScopeStack` in [xAI Grok](file:///C:/Users/aigroup5/PycharmProjects/grok-build/crates/codegen/xai-codebase-graph/src/scope_graph/graph.rs#L456)
+* **Goal**: Traverse scope graph nodes up to the root.
 
 ```rust
-let v: Vec<i32> = (1..5).collect();          // [1, 2, 3, 4]
-let v = (1..5).collect::<Vec<i32>>();        // same thing, turbofish syntax ::<>
-let s: String = vec!['h','i'].into_iter().collect();  // "hi"
-```
-
----
-
-## Ranges are Iterators
-
-```rust
-for i in 0..5 { }         // 0, 1, 2, 3, 4
-for i in 0..=5 { }        // 0, 1, 2, 3, 4, 5  (inclusive)
-for i in (0..5).rev() { }  // 4, 3, 2, 1, 0  (reversed)
-```
-
----
-
-## Iterators are LAZY
-
-Nothing happens until you **consume** the iterator:
-
-```rust
-let v = vec![1, 2, 3];
-
-v.iter().map(|x| x * 2);                    // ⚠️ does NOTHING! Just creates an iterator
-v.iter().map(|x| x * 2).collect::<Vec<_>>(); // ✅ now it actually runs
-```
-
-Consumers that trigger execution: `.collect()`, `.sum()`, `.for_each()`, `.count()`, `for` loop
-
----
-
-## Zero-Cost Abstraction
-
-**Iterators are NOT slower than manual loops.** Rust compiles iterator chains into the same machine code as a hand-written `while` loop. No overhead.
-
-```rust
-// These compile to the SAME assembly:
-numbers.iter().filter(|n| *n % 2 == 0).map(|n| n * n).sum()
-// vs
-let mut sum = 0;
-for n in numbers { if n % 2 == 0 { sum += n * n; } }
-```
-
----
-
-## Creating Your Own Iterator
-
-You can make any struct iterable by implementing the `Iterator` trait:
-
-```rust
-struct Counter {
-    count: u32,
+pub struct ScopeStack<'a> {
+    graph: &'a ScopeGraph,
+    current: Option<NodeIndex>,
 }
 
-impl Iterator for Counter {
-    type Item = u32;         // what type does next() return?
+impl<'a> Iterator for ScopeStack<'a> {
+    type Item = NodeIndex;
 
-    fn next(&mut self) -> Option<u32> {
-        self.count += 1;
-        if self.count <= 5 {
-            Some(self.count)
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(curr) = self.current {
+            let parent = self.graph.find_parent_scope(curr);
+            self.current = parent;
+            Some(curr)
         } else {
-            None             // stop iterating
+            None
         }
     }
 }
-
-// Now you can use it like any iterator:
-let c = Counter { count: 0 };
-for num in c {
-    println!("{}", num);  // prints 1, 2, 3, 4, 5
-}
-
-// And chain methods on it:
-let sum: u32 = Counter { count: 0 }
-    .filter(|n| n % 2 == 0)
-    .sum();  // 2 + 4 = 6
 ```
+
+### Pattern C: Fallible Streaming Disk Iterator (`type Item = io::Result<T>`)
+* **Real Project Example**: `UpdatesIterator` in [xAI Grok](file:///C:/Users/aigroup5/PycharmProjects/grok-build/crates/codegen/xai-grok-shell/src/session/storage/mod.rs#L517)
+* **Goal**: Read lines from disk on demand, yielding `io::Result<T>` so errors don't panic the process.
+
+```rust
+impl Iterator for UpdatesIterator {
+    type Item = std::io::Result<SessionUpdate>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.buffer.clear();
+        match self.reader.read_line(&mut self.buffer) {
+            Ok(0) => None, // EOF
+            Ok(_) => match SessionUpdate::parse(&self.buffer) {
+                Ok(update) => Some(Ok(update)),
+                Err(e) => Some(Err(std::io::Error::new(std::io::ErrorKind::InvalidData, e))),
+            },
+            Err(e) => Some(Err(e)),
+        }
+    }
+}
+```
+
+---
+
+## 10. Async Streams & Parallel Iterators
+
+### Parallel Iteration with Rayon
+For CPU-bound parallel workloads (e.g. indexing codebases across CPU cores):
+
+```rust
+use rayon::prelude::*;
+
+let files: Vec<PathBuf> = get_all_files();
+files.par_iter().for_each(|file| {
+    parse_and_index(file);
+});
+```
+
+### Async Streams (`StreamExt`)
+For IO-bound asynchronous workloads (e.g. LLM token streaming, WebSockets, ACP tool calls):
+
+```rust
+use futures::StreamExt;
+
+async fn process_llm_stream(mut stream: impl StreamExt<Item = Token>) {
+    while let Some(token) = stream.next().await {
+        print!("{}", token);
+    }
+}
+```
+
+---
+
+## 11. Performance Guarantee: Zero-Cost Abstraction
+
+Rust compiles iterator chains into **the exact same machine code as hand-written C/C++ loops**.
+
+```rust
+// High-level iterator chain
+let sum: i32 = numbers.iter().filter(|x| **x > 0).map(|x| x * 2).sum();
+```
+
+Compiles to the exact same assembly as:
+
+```rust
+let mut sum = 0;
+for i in 0..numbers.len() {
+    let val = numbers[i];
+    if val > 0 {
+        sum += val * 2;
+    }
+}
+```
+**No overhead, no extra allocations, maximum performance.**
