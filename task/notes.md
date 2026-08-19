@@ -564,4 +564,45 @@ Just use `**` inside the body. No fancy patterns needed:
 .filter(|n| **n > 10)      // simple and clear
 .filter(|n| **n % 2 == 0)  // same pattern
 ```
+
+---
+
+### HashMap (Rust vs Python `dict`)
+
+A `HashMap` in Rust is a key-value store, exactly like a dictionary (`dict`) in Python.
+
+#### 1. Python vs Rust Method Cheat Sheet
+
+| Operation | Python (`dict`) | Rust (`HashMap`) |
+|---|---|---|
+| **Import** | Built-in | `use std::collections::HashMap;` |
+| **Create** | `d = {}` | `let mut map = HashMap::new();` |
+| **Insert / Update** | `d["apple"] = 3` | `map.insert("apple".to_string(), 3);` |
+| **Safe Get** | `d.get("apple")` | `map.get("apple")` → returns `Option<&V>` (`Some(&3)` or `None`) |
+| **Check key** | `"apple" in d` | `map.contains_key("apple")` → returns `bool` |
+| **Iterate keys** | `d.keys()` | `map.keys()` |
+| **Iterate values** | `d.values()` | `map.values()` |
+| **Iterate pairs** | `for k, v in d.items():` | `for (k, v) in &map { ... }` |
+| **Remove** | `d.pop("apple")` | `map.remove("apple")` |
+
+#### 2. The Big Difference: `entry()` API (The Word Count Superpower)
+
+In Python, to count occurrences you usually write:
+```python
+counts[word] = counts.get(word, 0) + 1
+```
+
+In Rust, you use the **`.entry()`** API:
+```rust
+*map.entry(word).or_insert(0) += 1;
+```
+
+**How it works step-by-step:**
+1. `map.entry(word)` — checks if `word` exists in the map.
+2. `.or_insert(0)` — if the key doesn't exist, it inserts `0`. It returns a **mutable reference `&mut usize`** to the value in the map.
+3. `*` — **dereferences** that reference so you can directly modify the number: `+= 1`.
+
+#### 3. Key Details to Watch in Rust:
+1. **Types must be uniform:** All keys must be one type (`K`), and all values must be one type (`V`) $\rightarrow$ e.g., `HashMap<String, usize>`.
+2. **Order is random:** Keys are not in sorted order when iterating. If you need them sorted (like in Q17), collect into a `Vec` and call `.sort()`.
 
