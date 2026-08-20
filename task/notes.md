@@ -605,4 +605,29 @@ In Rust, you use the **`.entry()`** API:
 #### 3. Key Details to Watch in Rust:
 1. **Types must be uniform:** All keys must be one type (`K`), and all values must be one type (`V`) $\rightarrow$ e.g., `HashMap<String, usize>`.
 2. **Order is random:** Keys are not in sorted order when iterating. If you need them sorted (like in Q17), collect into a `Vec` and call `.sort()`.
+
+---
+
+### Rust Modules, `mod` vs `use`, and `pub struct` (Quick Reference)
+
+*(Full guide created in [docs/modules_and_visibility.md](file:///c:/Users/deepa/Projects/Rust/docs/modules_and_visibility.md))*
+
+#### 1. `mod` vs `use`
+- **`mod employee;`** = **LOADS** the file `employee.rs` into the program tree. Write this **only ONCE** in `main.rs`.
+- **`use crate::employee::Employee;`** = **SHORTCUT / IMPORT**. Write this in any file where you need `Employee`.
+
+#### 2. `pub struct` and Fields
+- Making a struct public (`pub struct Employee`) **does NOT make its fields public**!
+- Fields are **private by default**.
+- If outside code needs to read/write a field directly: `pub name: String`.
+- If fields are private: you **must** provide a `pub fn new(...) -> Self` constructor and public methods.
+
+#### 3. `pub enum` is different
+- Making an enum public (`pub enum Status`) **automatically makes ALL variants public**!
+
+#### 4. Paths
+- `crate::` = starts from the project root (`main.rs` or `lib.rs`).
+- `super::` = goes up one parent module (like `..`).
+- `self::` = current module (like `.`).
+
 
