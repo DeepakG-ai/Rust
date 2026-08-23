@@ -1,0 +1,434 @@
+[package]
+name = "dsa"
+version = "0.1.0"
+edition = "2021"
+
+# Rust rewrite of the Python DSA practice questions
+# (from C:\Users\deepa\Projects\AI_Python\DSA-)
+#
+# Organized by topic folders under src/bin/, mirroring the Python layout:
+#   arrays/ strings/ linked_list/ trees/ graphs/
+#
+# Because files live in subfolders, each question needs an explicit [[bin]]
+# entry (cargo only auto-discovers files directly inside src/bin/).
+#
+# Run any question with:   cargo run --bin <name>
+#   e.g. cargo run --bin arrays_01_two_sum
+# Run everything:          cargo run --bin arrays_01_two_sum ... (or use the loop below)
+
+# ------------------------- 1. ARRAYS (14) -------------------------
+
+[[bin]]
+name = "arrays_01_two_sum"
+path = "src/bin/arrays/01_two_sum.rs"
+
+[[bin]]
+name = "arrays_02_best_time_buy_sell"
+path = "src/bin/arrays/02_best_time_buy_sell.rs"
+
+[[bin]]
+name = "arrays_03_product_except_self"
+path = "src/bin/arrays/03_product_except_self.rs"
+
+[[bin]]
+name = "arrays_04_maximum_subarray"
+path = "src/bin/arrays/04_maximum_subarray.rs"
+
+[[bin]]
+name = "arrays_05_maximum_product_subarray"
+path = "src/bin/arrays/05_maximum_product_subarray.rs"
+
+[[bin]]
+name = "arrays_06_search_rotated"
+path = "src/bin/arrays/06_search_rotated.rs"
+
+[[bin]]
+name = "arrays_07_three_sum"
+path = "src/bin/arrays/07_three_sum.rs"
+
+[[bin]]
+name = "arrays_08_four_sum"
+path = "src/bin/arrays/08_four_sum.rs"
+
+[[bin]]
+name = "arrays_09_container_most_water"
+path = "src/bin/arrays/09_container_most_water.rs"
+
+[[bin]]
+name = "arrays_10_trapping_rain_water"
+path = "src/bin/arrays/10_trapping_rain_water.rs"
+
+[[bin]]
+name = "arrays_11_merge_sorted_array"
+path = "src/bin/arrays/11_merge_sorted_array.rs"
+
+[[bin]]
+name = "arrays_12_longest_subarray_sum_leq_k"
+path = "src/bin/arrays/12_longest_subarray_sum_leq_k.rs"
+
+[[bin]]
+name = "arrays_13_count_subarrays_sum_lt_k"
+path = "src/bin/arrays/13_count_subarrays_sum_lt_k.rs"
+
+[[bin]]
+name = "arrays_14_longest_consecutive"
+path = "src/bin/arrays/14_longest_consecutive.rs"
+
+# ------------------------- 2. STRINGS (9) -------------------------
+
+[[bin]]
+name = "strings_01_longest_substr_no_repeat"
+path = "src/bin/strings/01_longest_substr_no_repeat.rs"
+
+[[bin]]
+name = "strings_02_longest_palindromic_substring"
+path = "src/bin/strings/02_longest_palindromic_substring.rs"
+
+[[bin]]
+name = "strings_03_valid_anagram"
+path = "src/bin/strings/03_valid_anagram.rs"
+
+[[bin]]
+name = "strings_04_group_anagrams"
+path = "src/bin/strings/04_group_anagrams.rs"
+
+[[bin]]
+name = "strings_05_valid_parentheses"
+path = "src/bin/strings/05_valid_parentheses.rs"
+
+[[bin]]
+name = "strings_06_minimum_window_substring"
+path = "src/bin/strings/06_minimum_window_substring.rs"
+
+[[bin]]
+name = "strings_07_atoi"
+path = "src/bin/strings/07_atoi.rs"
+
+[[bin]]
+name = "strings_08_character_replacement"
+path = "src/bin/strings/08_character_replacement.rs"
+
+[[bin]]
+name = "strings_09_valid_palindrome"
+path = "src/bin/strings/09_valid_palindrome.rs"
+
+# ------------------------- 3. LINKED LIST (7) -------------------------
+
+[[bin]]
+name = "linked_list_01_add_two_numbers"
+path = "src/bin/linked_list/01_add_two_numbers.rs"
+
+[[bin]]
+name = "linked_list_02_reverse_list"
+path = "src/bin/linked_list/02_reverse_list.rs"
+
+[[bin]]
+name = "linked_list_03_merge_two_sorted_lists"
+path = "src/bin/linked_list/03_merge_two_sorted_lists.rs"
+
+[[bin]]
+name = "linked_list_04_linked_list_cycle"
+path = "src/bin/linked_list/04_linked_list_cycle.rs"
+
+[[bin]]
+name = "linked_list_05_remove_nth_from_end"
+path = "src/bin/linked_list/05_remove_nth_from_end.rs"
+
+[[bin]]
+name = "linked_list_06_merge_k_sorted_lists"
+path = "src/bin/linked_list/06_merge_k_sorted_lists.rs"
+
+[[bin]]
+name = "linked_list_07_intersection_of_two_lists"
+path = "src/bin/linked_list/07_intersection_of_two_lists.rs"
+
+# ------------------------- 4. TREES (8) -------------------------
+
+[[bin]]
+name = "trees_01_max_depth"
+path = "src/bin/trees/01_max_depth.rs"
+
+[[bin]]
+name = "trees_02_validate_bst"
+path = "src/bin/trees/02_validate_bst.rs"
+
+[[bin]]
+name = "trees_03_level_order_traversal"
+path = "src/bin/trees/03_level_order_traversal.rs"
+
+[[bin]]
+name = "trees_04_lca_bst"
+path = "src/bin/trees/04_lca_bst.rs"
+
+[[bin]]
+name = "trees_05_max_path_sum"
+path = "src/bin/trees/05_max_path_sum.rs"
+
+[[bin]]
+name = "trees_06_serialize_deserialize"
+path = "src/bin/trees/06_serialize_deserialize.rs"
+
+[[bin]]
+name = "trees_07_kth_smallest_bst"
+path = "src/bin/trees/07_kth_smallest_bst.rs"
+
+[[bin]]
+name = "trees_08_invert_binary_tree"
+path = "src/bin/trees/08_invert_binary_tree.rs"
+
+# ------------------------- 5. GRAPHS (BFS/DFS + 19) -------------------------
+
+[[bin]]
+name = "graphs_bfs_traversal"
+path = "src/bin/graphs/bfs_traversal.rs"
+
+[[bin]]
+name = "graphs_dfs_traversal"
+path = "src/bin/graphs/dfs_traversal.rs"
+
+[[bin]]
+name = "graphs_01_number_of_provinces"
+path = "src/bin/graphs/01_number_of_provinces.rs"
+
+[[bin]]
+name = "graphs_02_number_of_islands"
+path = "src/bin/graphs/02_number_of_islands.rs"
+
+[[bin]]
+name = "graphs_03_clone_graph"
+path = "src/bin/graphs/03_clone_graph.rs"
+
+[[bin]]
+name = "graphs_04_rotten_oranges"
+path = "src/bin/graphs/04_rotten_oranges.rs"
+
+[[bin]]
+name = "graphs_05_cycle_undirected"
+path = "src/bin/graphs/05_cycle_undirected.rs"
+
+[[bin]]
+name = "graphs_06_topological_sort"
+path = "src/bin/graphs/06_topological_sort.rs"
+
+[[bin]]
+name = "graphs_07_cycle_directed"
+path = "src/bin/graphs/07_cycle_directed.rs"
+
+[[bin]]
+name = "graphs_08_course_schedule_i"
+path = "src/bin/graphs/08_course_schedule_i.rs"
+
+[[bin]]
+name = "graphs_09_course_schedule_ii"
+path = "src/bin/graphs/09_course_schedule_ii.rs"
+
+[[bin]]
+name = "graphs_10_pacific_atlantic"
+path = "src/bin/graphs/10_pacific_atlantic.rs"
+
+[[bin]]
+name = "graphs_11_graph_valid_tree"
+path = "src/bin/graphs/11_graph_valid_tree.rs"
+
+[[bin]]
+name = "graphs_12_alien_dictionary"
+path = "src/bin/graphs/12_alien_dictionary.rs"
+
+[[bin]]
+name = "graphs_12_shortest_path_dag"
+path = "src/bin/graphs/12b_shortest_path_dag.rs"
+
+[[bin]]
+name = "graphs_13_shortest_path_unit_weight"
+path = "src/bin/graphs/13_shortest_path_unit_weight.rs"
+
+[[bin]]
+name = "graphs_14_word_search"
+path = "src/bin/graphs/14_word_search.rs"
+
+[[bin]]
+name = "graphs_15_word_ladder_i"
+path = "src/bin/graphs/15_word_ladder_i.rs"
+
+[[bin]]
+name = "graphs_16_word_ladder_ii"
+path = "src/bin/graphs/16_word_ladder_ii.rs"
+
+[[bin]]
+name = "graphs_17_dijkstra"
+path = "src/bin/graphs/17_dijkstra.rs"
+
+[[bin]]
+name = "graphs_18_network_delay_time"
+path = "src/bin/graphs/18_network_delay_time.rs"
+
+[[bin]]
+name = "graphs_19_shortest_path_weighted_undirected"
+path = "src/bin/graphs/19_shortest_path_weighted_undirected.rs"
+
+[[bin]]
+name = "graphs_20_minimum_height_trees"
+path = "src/bin/graphs/20_minimum_height_trees.rs"
+
+# 6. Dynamic Programming (10)
+[[bin]]
+name = "dp_01_climbing_stairs"
+path = "src/bin/dp/01_climbing_stairs.rs"
+
+[[bin]]
+name = "dp_02_coin_change"
+path = "src/bin/dp/02_coin_change.rs"
+
+[[bin]]
+name = "dp_03_longest_increasing_subsequence"
+path = "src/bin/dp/03_longest_increasing_subsequence.rs"
+
+[[bin]]
+name = "dp_04_house_robber"
+path = "src/bin/dp/04_house_robber.rs"
+
+[[bin]]
+name = "dp_05_decode_ways"
+path = "src/bin/dp/05_decode_ways.rs"
+
+[[bin]]
+name = "dp_06_unique_paths"
+path = "src/bin/dp/06_unique_paths.rs"
+
+[[bin]]
+name = "dp_07_jump_game"
+path = "src/bin/dp/07_jump_game.rs"
+
+[[bin]]
+name = "dp_08_longest_common_subsequence"
+path = "src/bin/dp/08_longest_common_subsequence.rs"
+
+[[bin]]
+name = "dp_09_edit_distance"
+path = "src/bin/dp/09_edit_distance.rs"
+
+[[bin]]
+name = "dp_10_dungeon_game"
+path = "src/bin/dp/10_dungeon_game.rs"
+
+# 7. Intervals (5)
+[[bin]]
+name = "intervals_01_merge_intervals"
+path = "src/bin/intervals/01_merge_intervals.rs"
+
+[[bin]]
+name = "intervals_02_insert_interval"
+path = "src/bin/intervals/02_insert_interval.rs"
+
+[[bin]]
+name = "intervals_03_non_overlapping_intervals"
+path = "src/bin/intervals/03_non_overlapping_intervals.rs"
+
+[[bin]]
+name = "intervals_04_meeting_rooms_ii"
+path = "src/bin/intervals/04_meeting_rooms_ii.rs"
+
+[[bin]]
+name = "intervals_05_chocolate_distribution"
+path = "src/bin/intervals/05_chocolate_distribution.rs"
+
+# 8. Heap / Priority Queue (4)
+[[bin]]
+name = "heap_01_kth_largest_element"
+path = "src/bin/heap/01_kth_largest_element.rs"
+
+[[bin]]
+name = "heap_02_median_of_data_stream"
+path = "src/bin/heap/02_median_of_data_stream.rs"
+
+[[bin]]
+name = "heap_03_k_closest_points"
+path = "src/bin/heap/03_k_closest_points.rs"
+
+[[bin]]
+name = "heap_04_top_k_frequent_elements"
+path = "src/bin/heap/04_top_k_frequent_elements.rs"
+
+# 9. Backtracking (4)
+[[bin]]
+name = "backtracking_01_combination_sum"
+path = "src/bin/backtracking/01_combination_sum.rs"
+
+[[bin]]
+name = "backtracking_02_n_queens"
+path = "src/bin/backtracking/02_n_queens.rs"
+
+[[bin]]
+name = "backtracking_03_palindrome_partitioning"
+path = "src/bin/backtracking/03_palindrome_partitioning.rs"
+
+[[bin]]
+name = "backtracking_04_sudoku_solver"
+path = "src/bin/backtracking/04_sudoku_solver.rs"
+
+# 10. Design & System-Level (5)
+[[bin]]
+name = "design_01_lru_cache"
+path = "src/bin/design/01_lru_cache.rs"
+
+[[bin]]
+name = "design_02_lfu_cache"
+path = "src/bin/design/02_lfu_cache.rs"
+
+[[bin]]
+name = "design_03_trie"
+path = "src/bin/design/03_trie.rs"
+
+[[bin]]
+name = "design_04_hit_counter"
+path = "src/bin/design/04_hit_counter.rs"
+
+[[bin]]
+name = "design_05_autocomplete_system"
+path = "src/bin/design/05_autocomplete_system.rs"
+
+# 11. Matrix (6)
+[[bin]]
+name = "matrix_01_matrix_chain_multiplication"
+path = "src/bin/matrix/01_matrix_chain_multiplication.rs"
+
+[[bin]]
+name = "matrix_02_minimum_path_sum"
+path = "src/bin/matrix/02_minimum_path_sum.rs"
+
+[[bin]]
+name = "matrix_03_maximal_rectangle"
+path = "src/bin/matrix/03_maximal_rectangle.rs"
+
+[[bin]]
+name = "matrix_04_search_2d_matrix"
+path = "src/bin/matrix/04_search_2d_matrix.rs"
+
+[[bin]]
+name = "matrix_05_rotate_image"
+path = "src/bin/matrix/05_rotate_image.rs"
+
+[[bin]]
+name = "matrix_06_set_matrix_zeroes"
+path = "src/bin/matrix/06_set_matrix_zeroes.rs"
+
+# ---- 5 BONUS Problems (96-100) ----
+[[bin]]
+name = "trees_09_diameter_of_binary_tree"
+path = "src/bin/trees/09_diameter_of_binary_tree.rs"
+
+[[bin]]
+name = "dp_11_word_break"
+path = "src/bin/dp/11_word_break.rs"
+
+[[bin]]
+name = "backtracking_05_subsets"
+path = "src/bin/backtracking/05_subsets.rs"
+
+[[bin]]
+name = "backtracking_06_permutations"
+path = "src/bin/backtracking/06_permutations.rs"
+
+[[bin]]
+name = "heap_05_task_scheduler"
+path = "src/bin/heap/05_task_scheduler.rs"
