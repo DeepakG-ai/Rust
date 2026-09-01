@@ -4,7 +4,7 @@ use std::time::Instant;
 //std::thread::spawn  →  creates a heavy OS Thread
 
 async fn fetch_user_data(user_id: u32, delay_ms: u64) -> String {
-    tokio::time::sleep(tokio::time::Duration::from_millis(delay_ms)).await;// task has to will wait first as delay ms given, then load
+    tokio::time::sleep(tokio::time::Duration::from_millis(delay_ms)).await; // task has to will wait first as delay ms given, then load
     format!("User {user_id} data loaded")
 }
 
@@ -30,18 +30,16 @@ async fn main() {
     //for (id, delay) in tasks {
     //  let handle = tokio::spawn(fetch_user_data(id, delay));
     //  handles.push(handle);
-//}
+    //}
 
-// Await all results
-//  for handle in handles {
+    // Await all results
+    //  for handle in handles {
     //let result = handle.await.unwrap();
     //println!("{result}");
-//}
-
+    //}
 
     println!("{result1}");
     println!("{result2}");
     println!("{result3}");
     println!("Total elapsed: {elapsed:.2?}");
-
 }

@@ -655,28 +655,28 @@ In `main`:
 
 ## Progress
 
-- [ ] Q1 for loop
-- [ ] Q2 functions
-- [ ] Q3 borrow vs move
-- [ ] Q4 String vs &str
-- [ ] Q5 struct + methods
-- [ ] Q6 &mut self
-- [ ] Q7 enum + match
-- [ ] Q8 Option
-- [ ] Q9 Result + ?
-- [ ] Q10 trait
-- [ ] Q11 default method
-- [ ] Q12 dyn trait
-- [ ] Q13 generic function
-- [ ] Q14 generic struct
-- [ ] Q15 lifetimes
-- [ ] Q16 iterators
-- [ ] Q17 HashMap
-- [ ] Q18 modules across files
-- [ ] Q19 retry
-- [ ] Q20 Two Sum
-- [ ] Q21 Valid Anagram
-- [ ] Q22 Number of Islands
+- [x] Q1 for loop
+- [x] Q2 functions
+- [x] Q3 borrow vs move
+- [x] Q4 String vs &str
+- [x] Q5 struct + methods
+- [x] Q6 &mut self
+- [x] Q7 enum + match
+- [x] Q8 Option
+- [x] Q9 Result + ?
+- [x] Q10 trait
+- [x] Q11 default method
+- [x] Q12 dyn trait
+- [x] Q13 generic function
+- [x] Q14 generic struct
+- [x] Q15 lifetimes
+- [x] Q16 iterators
+- [x] Q17 HashMap
+- [x] Q18 modules across files
+- [x] Q19 retry
+- [x] Q20 Two Sum
+- [x] Q21 Valid Anagram
+- [x] Q22 Number of Islands
 - [ ] Q23 Tokio async & spawn
 - [ ] Q24 Axum router & JSON API
 - [ ] Q25 Axum shared state CRUD
@@ -687,3 +687,123 @@ In `main`:
 for a hint, not the answer. The error messages are long because the fix is
 usually inside them.
 
+Here is exactly how **`Arc`** works under the hood in the Rust standard library.
+
+---
+
+### 1. The Internal Structs (How it is defined in Rust's source code)
+
+In the standard library, `Arc` does not put your data alone on the heap. It wraps it inside an internal struct called **`ArcInner<T>`**:
+
+```rust
+// 1. What actually lives on the HEAP:
+struct ArcInner<T> {
+    strong_count: AtomicUsize, // Atomic integer: number of active Arcs (e.g. 1, 2, 3...)
+    weak_count:   AtomicUsize, // Number of Weak references
+    data:         T,           // The actual value (e.g. String "hello")
+}
+
+// 2. What lives on your STACK:
+pub struct Arc<T> {
+    ptr: *const ArcInner<T>,   // Just an 8-byte memory pointer!
+}
+```
+
+---
+
+### 2. Step-by-Step Walkthrough
+
+#### Step 1: When you call `let arc1 = Arc::new(String::from("hello"));`
+
+1. Rust allocates memory for `ArcInner` on the **heap**.
+2. It sets `strong_count = 1`.
+3. It places your `String` data inside `data`.
+4. It puts a pointer (`ptr`) inside `arc1` on the **stack**.
+
+```
+STACK                                  HEAP (Memory Address: 0x1000)
+┌─────────────┐                        ┌─────────────────────────────────┐
+│ arc1        │                        │ ArcInner<String>                │
+│ ptr: 0x1000 ├──────────────────────► │   strong_count: 1               │
+└─────────────┘                        │   weak_count:   1               │
+                                       │   data:         "hello"         │
+                                       └─────────────────────────────────┘
+```
+
+---
+
+#### Step 2: When you call `let arc2 = Arc::clone(&arc1);`
+
+Here is the **actual simplified implementation** of `Arc::clone`:
+
+```rust
+impl<T> Clone for Arc<T> {
+    fn clone(&self) -> Arc<T> {
+        // 1. Atomically increment the strong counter by 1
+        self.inner().strong_count.fetch_add(1, Ordering::Relaxed);
+
+        // 2. Just copy the 8-byte pointer address!
+        Arc { ptr: self.ptr }
+    }
+}
+```
+
+What actually happens:
+1. It looks at the heap block at `0x1000`.
+2. It runs an atomic CPU instruction: `strong_count += 1` (now **`2`**).
+3. It creates `arc2` on the stack with the **exact same pointer** (`0x1000`).
+4. **No string bytes are copied!** Only 8 bytes (the pointer) are copied.
+
+```
+STACK                                  HEAP (Memory Address: 0x1000)
+┌─────────────┐                        ┌─────────────────────────────────┐
+│ arc1        │                        │ ArcInner<String>                │
+│ ptr: 0x1000 ├──────────┐             │   strong_count: 2  <-- (+1)     │
+└─────────────┘          │             │   weak_count:   1               │
+                         ├───────────► │   data:         "hello" (NO COPY)│
+┌─────────────┐          │             └─────────────────────────────────┘
+│ arc2        │          │
+│ ptr: 0x1000 ├──────────┘
+└─────────────┘
+```
+
+---
+
+#### Step 3: When `arc1` goes out of scope (Dropped)
+
+Here is the simplified `Drop` implementation:
+
+```rust
+impl<T> Drop for Arc<T> {
+    fn drop(&mut self) {
+        // 1. Atomically decrement the strong counter by 1
+        if self.inner().strong_count.fetch_sub(1, Ordering::Release) == 1 {
+            // 2. If count REACHED 0 -> No one is using it anymore!
+            drop_data_and_free_heap(self.ptr);
+        }
+    }
+}
+```
+
+* When `arc1` drops:
+  * `strong_count` becomes **`1`** (2 - 1 = 1).
+  * Since `count != 0`, the `"hello"` data **stays alive** for `arc2`.
+* Later, when `arc2` drops:
+  * `strong_count` becomes **`0`** (1 - 1 = 0).
+  * Since `count == 0`, Rust runs the destructor for `String` and **frees the heap memory**.
+
+---
+
+### 3. Why is it called **`Arc`** (Atomic Reference Counted)?
+
+The counter uses **`AtomicUsize`**, not a regular integer `usize`.
+
+* **Regular integer increment (`count += 1`)**: In multithreading, if 2 threads increment at the exact same millisecond, they can overwrite each other (race condition).
+* **Atomic increment (`fetch_add`)**: Uses hardware-level CPU instructions (like `LOCK XADD` on x86 processors). The CPU locks the memory bus for a fraction of a nanosecond to guarantee the counter is 100% accurate across all CPU cores.
+
+---
+
+### Summary
+* `Arc::new`: Allocates `{ counter: 1, data }` on heap.
+* `Arc::clone`: **Counter + 1** and copies an 8-byte pointer (takes ~10 nanoseconds).
+* `Arc::drop`: **Counter - 1**. If 0, frees memory.
