@@ -9,6 +9,16 @@ serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.151"
 tokio = { version = "1.43", features = ["full"] }
 axum = "0.8"
+
+# Q27, Q35 — error types without the boilerplate
+thiserror = "2.0"
+
+# Q33, Q35 — structured logging with spans
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Q34, Q35 — SQLite. First build after adding this is slow; that is expected.
+sqlx = { version = "0.8", features = ["runtime-tokio", "sqlite"] }
 [[bin]]
 name = "borrow"
 path = "src/borrow.rs"
@@ -146,3 +156,43 @@ path = "task/q25.rs"
 
 
 
+
+[[bin]]
+name = "q26"
+path = "task/q26.rs"
+
+[[bin]]
+name = "q27"
+path = "task/q27.rs"
+
+[[bin]]
+name = "q28"
+path = "task/q28.rs"
+
+[[bin]]
+name = "q29"
+path = "task/q29.rs"
+
+[[bin]]
+name = "q30"
+path = "task/q30.rs"
+
+[[bin]]
+name = "q31"
+path = "task/q31.rs"
+
+[[bin]]
+name = "q32"
+path = "task/q32.rs"
+
+[[bin]]
+name = "q33"
+path = "task/q33.rs"
+
+[[bin]]
+name = "q34"
+path = "task/q34.rs"
+
+[[bin]]
+name = "q35"
+path = "task/q35.rs"

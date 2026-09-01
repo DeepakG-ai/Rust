@@ -653,6 +653,364 @@ In `main`:
 
 ---
 
+# Part 6 — The gaps (Q26–Q32)
+
+These are basics that Q1–Q25 skipped. Do them **before** Q33–Q35, even though
+they come later in the numbering — the files `q01.rs`–`q25.rs` already exist, so
+renumbering would break `Cargo.toml`.
+
+---
+
+## Q26 — Unit tests (`#[cfg(test)]`)
+
+Nothing in Q1–Q25 asked you to write a test. Every take-home is graded on this.
+
+Write a module with three functions, then test all three:
+
+```rust
+fn is_even(n: i32) -> bool { todo!() }
+fn average(nums: &[f64]) -> Option<f64> { todo!() }   // None when empty
+fn parse_age(s: &str) -> Result<u32, String> { todo!() } // Err if not a number or > 150
+```
+
+Then add:
+
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn even_numbers_are_even() {
+        assert!(is_even(4));
+        assert!(!is_even(3));
+    }
+
+    #[test]
+    fn average_of_empty_slice_is_none() {
+        assert_eq!(average(&[]), None);
+    }
+
+    #[test]
+    fn rejects_impossible_age() {
+        assert!(parse_age("200").is_err());
+    }
+}
+```
+
+Run with `cargo test --bin q26`.
+
+**Then answer in a comment:** what does `use super::*;` do, and why does
+`#[cfg(test)]` mean the test code is not in your release binary?
+
+*Hint: `assert_eq!(a, b)` prints both values on failure; `assert!(x)` only prints
+the expression. Prefer `assert_eq!` — you will thank yourself at 2am.*
+
+---
+
+## Q27 — Your own error type
+
+Q9 taught you `Result` and `?`, then stopped. This is the missing half — and it
+is the line between "writes Rust" and "ships Rust".
+
+Write a config loader that can fail three different ways:
+
+```rust
+#[derive(Debug)]
+enum ConfigError {
+    NotFound { path: String },
+    BadPort { value: String },
+    Empty,
+}
+```
+
+1. `impl std::fmt::Display for ConfigError` — one clear sentence per variant,
+   and **name the thing that failed**: `config not found at /etc/app.toml`, not
+   `not found`.
+2. `impl std::error::Error for ConfigError {}`
+3. `impl From<std::num::ParseIntError> for ConfigError` so that `?` converts
+   automatically.
+4. Write `fn load(text: &str) -> Result<u16, ConfigError>` that parses a line
+   like `port=8080` and uses `?` on the `.parse()` call — with no `.map_err()`
+   anywhere.
+
+**Then answer in a comment:** which of your impls is what makes the bare `?`
+work on the `parse()` call?
+
+*Hint: `?` calls `From::from` on the error before returning. That single fact is
+the entire mechanism.*
+
+---
+
+## Q28 — Closures (`Fn`, `FnMut`, `FnOnce`)
+
+Q16 used closures inside iterators but never taught them. Rewrite Q19's retry so
+the operation is a parameter instead of hardcoded:
+
+```rust
+fn retry<F, T, E>(attempts: u32, mut operation: F) -> Result<T, E>
+where
+    F: FnMut(u32) -> Result<T, E>,
+{
+    todo!()
+}
+```
+
+Call it three ways:
+
+1. with a closure that fails twice then succeeds
+2. with a closure that captures a counter from the enclosing scope and mutates it
+3. with a plain function passed by name (no closure at all)
+
+**Then answer in a comment:** why is the bound `FnMut` and not `Fn`? What breaks
+if you change it to `Fn`? What breaks if you change it to `FnOnce`?
+
+*Hint: `FnMut` because you call it repeatedly AND it may mutate captured state.
+`Fn` would reject case 2; `FnOnce` would only let you call it once.*
+
+---
+
+## Q29 — Reading and writing files
+
+Completely absent from Q1–Q25, and it is in almost every real program.
+
+1. Write `notes.txt` containing 5 lines, some of which contain the word `error`
+   in mixed case.
+2. Write `fn count_errors(path: &str) -> std::io::Result<usize>` that opens the
+   file with `BufReader` and counts lines containing `error`, case-insensitively.
+3. Append a timestamped line to `runs.log` every time the program runs.
+4. Make it not load the whole file into memory.
+
+**Then answer in a comment:** what is the difference between `File::open` and
+`BufReader::new(File::open(..)?)` in terms of **syscalls**? Which of
+`File::create` and `OpenOptions::new().append(true)` destroys existing data?
+
+*Hint: `use std::io::BufRead;` for `.lines()`, `use std::io::Write;` for
+`writeln!`. Two different traits, and forgetting the import is the most common
+error here.*
+
+---
+
+## Q30 — Threads and channels (the sync world under Tokio)
+
+You jumped from sync code straight to `async` at Q23. This is the foundation
+`async` sits on — and `Arc<Mutex<T>>` from Q25 makes far more sense afterwards.
+
+Write three programs in one file:
+
+1. **Plain threads.** Spawn 5 threads with `std::thread::spawn`, each printing
+   its id, then `join()` them all. Show what happens if you forget to `join`.
+2. **Shared counter.** 10 threads each incrementing an `Arc<Mutex<i32>>` 1000
+   times. Print the final value — it must be exactly 10000. Then try the same
+   with `Arc<AtomicUsize>` and `fetch_add`.
+3. **Channels.** 3 producer threads sending 10 messages each over
+   `std::sync::mpsc::channel()`, with `main` collecting all 30.
+
+**Then answer in a comment:** why does the receiving `for` loop end on its own
+when the producers finish? What happens if you keep the original `Sender` alive
+in `main` and never drop it?
+
+*Hint: the loop ends when **all** senders are dropped. Each thread gets a clone;
+the original in `main` must be dropped too, or the loop hangs forever.*
+
+---
+
+## Q31 — serde on its own
+
+You already *use* serde in q24 and q25 via `#[derive(Serialize)]`, but never
+learned it directly.
+
+```rust
+#[derive(Serialize, Deserialize, Debug)]
+struct Settings {
+    model: String,
+    temperature: f64,
+    #[serde(default)]
+    verbose: bool,
+}
+```
+
+1. Write `settings.json` to disk with `serde_json::to_string_pretty`.
+2. Read it back into a `Settings`, change `model`, write it out again.
+3. Delete the `verbose` field from the JSON file by hand and re-run. Why does it
+   still parse?
+4. Add an extra unknown field to the JSON by hand. Why does it *also* still
+   parse? Now make that an error.
+
+**Then answer in a comment:** you deploy this, and next month the API adds a new
+field to its response. Which of your settings breaks the deploy — and is
+breaking what you actually want?
+
+*Hint: `#[serde(default)]` for step 3, `#[serde(deny_unknown_fields)]` for step 4.*
+
+---
+
+## Q32 — Pattern matching beyond a basic `match`
+
+Q7 only did a simple enum match. These four forms are everywhere in real code:
+
+```rust
+// 1. if let — one arm, ignore the rest
+if let Some(name) = maybe_name { println!("{name}"); }
+
+// 2. let ... else — bind or bail, no rightward drift
+let Some(name) = maybe_name else { return Err("no name".into()); };
+
+// 3. while let — loop until the pattern stops matching
+while let Some(top) = stack.pop() { println!("{top}"); }
+
+// 4. match guards and bindings
+match age {
+    n if n < 0   => "impossible",
+    0..=17       => "minor",
+    n @ 18..=64  => { println!("adult aged {n}"); "adult" }
+    _            => "senior",
+}
+```
+
+Write one program that uses all four on real data, then destructure a slice:
+
+```rust
+match nums {
+    []              => "empty",
+    [x]             => "one item",
+    [first, .., last] => "many",
+}
+```
+
+**Then answer in a comment:** rewrite this nested mess using `let ... else` and
+say which version you would rather debug:
+
+```rust
+if let Some(user) = get_user(id) {
+    if let Ok(cfg) = load_config() {
+        if cfg.enabled { do_work(user, cfg); }
+    }
+}
+```
+
+---
+
+# Part 7 — Production tooling (Q33–Q35)
+
+## Q33 — `tracing` (structured logging)
+
+`println!` does not survive contact with production. `tracing` is what real Rust
+services use — and unlike `log`, it understands **concurrency**.
+
+Add to `Cargo.toml` (already done for you):
+
+```toml
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+```
+
+1. Initialise a subscriber in `main` that reads the `RUST_LOG` env var:
+
+```rust
+tracing_subscriber::fmt()
+    .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+    .init();
+```
+
+2. Replace prints with `info!`, `warn!`, `error!`, `debug!`.
+3. Log **structured fields**, not formatted strings:
+   `info!(user_id = 42, attempt = 2, "retrying request");`
+4. Put `#[tracing::instrument]` on a function and call it. Look at what appears.
+5. Now make it concurrent: `tokio::spawn` three instrumented tasks at once and
+   look at the output again.
+
+Run it three ways and compare: `cargo run --bin q33`, then
+`RUST_LOG=info cargo run --bin q33`, then `RUST_LOG=debug cargo run --bin q33`.
+
+**Then answer in a comment:** with three tasks logging at once, how do you tell
+which line belongs to which task? That is what a **span** gives you that a plain
+log line cannot.
+
+*Hint: a span is a period of time with a name and fields; an event is a single
+moment. `#[instrument]` wraps the whole function in a span automatically.*
+
+---
+
+## Q34 — `sqlx` with SQLite
+
+Q25 stored users in an `Arc<Mutex<HashMap>>` — which vanishes when the process
+exits. Replace it with a real database. SQLite, not Postgres: no server to
+install, and the SQL is the same.
+
+**Note:** the first build after adding `sqlx` will be slow. That is normal.
+
+1. Create the pool and a table:
+
+```rust
+let pool = sqlx::SqlitePool::connect("sqlite:app.db?mode=rwc").await?;
+
+sqlx::query(
+    "CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY,
+        name TEXT NOT NULL,
+        email TEXT NOT NULL UNIQUE
+    )",
+)
+.execute(&pool)
+.await?;
+```
+
+2. Insert a user with **bound parameters**, never string formatting:
+
+```rust
+sqlx::query("INSERT INTO users (name, email) VALUES (?, ?)")
+    .bind(&name)
+    .bind(&email)
+    .execute(&pool)
+    .await?;
+```
+
+3. Read rows back into a struct using `sqlx::FromRow` and `fetch_all`.
+4. Fetch one user by id with `fetch_optional` — it returns `Option<T>`, so a
+   missing row is not an error.
+5. Handle the duplicate-email case: insert the same email twice and turn the
+   `UNIQUE` violation into your own error type from Q27.
+
+**Then answer in a comment:** why is `.bind(&name)` different from
+`format!("INSERT ... VALUES ('{name}')")`? Name the attack.
+
+*Hint: a `SqlitePool` is cheap to clone — it is an `Arc` internally, so clone it
+per request rather than wrapping it in a `Mutex`.*
+
+---
+
+## Q35 — Capstone: Axum + sqlx + tracing + tests
+
+Everything above, in one small service. This is the graduation project.
+
+Build a users API:
+
+- `GET    /users`      → list all
+- `GET    /users/{id}` → one user, `404` when missing
+- `POST   /users`      → create, `409` on duplicate email
+- `DELETE /users/{id}` → delete, `404` when missing
+
+Requirements, each one a question you already answered:
+
+- state is a `SqlitePool`, passed with `axum::extract::State` (Q34) — **not** a
+  `HashMap` (Q25)
+- one error enum for the whole app, with `impl IntoResponse` mapping each variant
+  to the right status code (Q27)
+- `#[tracing::instrument]` on every handler, `RUST_LOG` controlled (Q33)
+- config from env vars with sensible defaults: `DATABASE_URL`, `PORT` (Q31)
+- **integration tests** that spin up the app against an in-memory database
+  (`sqlite::memory:`) and assert real status codes (Q26)
+
+**The design question, which has no single right answer:** where do you convert a
+`sqlx::Error` into your own error type — in the handler, or in a separate
+storage layer? Write down which you chose and why.
+
+*Hint: `impl IntoResponse for AppError` is what lets a handler return
+`Result<Json<User>, AppError>` and have axum turn the error into an HTTP
+response automatically. That one impl removes every `match` from your handlers.*
+
+---
 ## Progress
 
 - [x] Q1 for loop
@@ -680,6 +1038,22 @@ In `main`:
 - [ ] Q23 Tokio async & spawn
 - [ ] Q24 Axum router & JSON API
 - [ ] Q25 Axum shared state CRUD
+
+**The gaps — do these next, before Q33–Q35:**
+
+- [ ] Q26 unit tests
+- [ ] Q27 custom error type
+- [ ] Q28 closures (Fn/FnMut/FnOnce)
+- [ ] Q29 file I/O
+- [ ] Q30 threads & channels
+- [ ] Q31 serde
+- [ ] Q32 pattern matching depth
+
+**Production tooling:**
+
+- [ ] Q33 tracing
+- [ ] Q34 sqlx + SQLite
+- [ ] Q35 capstone: Axum + sqlx + tracing + tests
 
 ---
 
