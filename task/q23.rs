@@ -43,4 +43,5 @@ async fn main() {
     println!("{result2}");
     println!("{result3}");
     println!("Total elapsed: {elapsed:.2?}");
+
 }
