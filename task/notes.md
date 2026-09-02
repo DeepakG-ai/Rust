@@ -630,4 +630,36 @@ In Rust, you use the **`.entry()`** API:
 - `super::` = goes up one parent module (like `..`).
 - `self::` = current module (like `.`).
 
+---
+
+### Type Aliases (`type` keyword)
+
+In Rust, the **`type`** keyword is used to create a **Type Alias** — which is simply a nickname or shortcut for an existing (often long or complex) type.
+
+#### The Problem: Long, repetitive types
+```rust
+fn get_user(state: Arc<Mutex<HashMap<u64, User>>>) { ... }
+fn create_user(state: Arc<Mutex<HashMap<u64, User>>>) { ... }
+fn delete_user(state: Arc<Mutex<HashMap<u64, User>>>) { ... }
+```
+
+#### The Solution: Define a shortcut with `type`
+```rust
+// Define the shortcut once:
+type AppState = Arc<Mutex<HashMap<u64, User>>>;
+
+// Now your functions are clean and readable:
+fn get_user(state: AppState) { ... }
+fn create_user(state: AppState) { ... }
+fn delete_user(state: AppState) { ... }
+```
+
+#### Key Characteristics:
+1. **Zero Runtime Cost:** It is completely erased at compile time. The compiler simply substitutes `AppState` with `Arc<Mutex<HashMap<u64, User>>>`.
+2. **Interchangeable:** `AppState` is not a new type; it is 100% compatible with the original type.
+3. **Commonly Used For:**
+   - Complex nested types (e.g., web server shared state in Axum/Tokio: `type Db = Arc<Mutex<HashMap<u64, String>>>;`)
+   - Custom `Result` shortcuts (e.g., `type Result<T> = std::result::Result<T, MyError>;`)
+   - Long closure signatures (e.g., `type Callback = Box<dyn Fn(i32) -> bool + Send + 'static>;`)
+
 
