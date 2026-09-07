@@ -33,7 +33,7 @@ impl Solution {
     /// Maintain original indices, sort by value, and use two pointers.
     /// Time: O(n log n) | Space: O(n)
     pub fn two_sum_better_sort(nums: Vec<i32>, target: i32) -> Vec<i32> {
-        let mut indexed: Vec<(i32, usize)> = nums.into_iter().enumerate().map(|(i, v)| (v, i)).collect();
+        let mut indexed: Vec<(i32, usize)> = nums.into_iter().enumerate().map(|(i, v)| (v, i)).collect(); //iter_into() is value is  consumed. it is going to out of scope.. (index,value)->(value,index)
         indexed.sort_unstable_by_key(|&(v, _)| v);
 
         let mut left = 0;
@@ -60,9 +60,9 @@ impl Solution {
     pub fn two_sum(nums: Vec<i32>, target: i32) -> Vec<i32> {
         let mut seen: HashMap<i32, i32> = HashMap::with_capacity(nums.len());
 
-        for (i, &num) in nums.iter().enumerate() {
+        for (i, &num) in nums.iter().enumerate() { //enumerate will return (index,value), iter() is value is not consumed.again value is return to nums
             let diff = target - num;
-            if let Some(&j) = seen.get(&diff) {
+            if let Some(&j) = seen.get(&diff) { // get will return option<T>, it some(&Value) or none. 
                 return vec![j, i as i32];
             }
             seen.insert(num, i as i32);

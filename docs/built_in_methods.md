@@ -6,6 +6,7 @@ This document is a comprehensive, production-grade reference for pre-built stand
 
 ## Table of Contents
 
+0. [Python vs Rust: Collection Method Mapping & Naming Philosophy](#0-python-vs-rust-collection-method-mapping--naming-philosophy)
 1. [Understanding Method Syntax in Rust](#1-understanding-method-syntax-in-rust)
 2. [Top 30 Most Used Rust Methods in Production](#2-top-30-most-used-rust-methods-in-production)
 3. [String (`String`) & String Slice (`&str`) Methods](#3-string-string--string-slice-str-methods)
@@ -17,6 +18,110 @@ This document is a comprehensive, production-grade reference for pre-built stand
 9. [Path (`Path`) & Path Buffer (`PathBuf`) Methods](#9-path-path--path-buffer-pathbuf-methods)
 10. [Smart Pointers, `Cow`, & Concurrency (`Arc`, `Rc`, `RefCell`, `Mutex`, `Atomic`) Methods](#10-smart-pointers-cow--concurrency-arc-rc-refcell-mutex-atomic-methods)
 11. [Iterator (`Iterator`) Methods](#11-iterator-iterator-methods)
+
+---
+
+## 0. Python vs Rust: Collection Method Mapping & Naming Philosophy
+
+In Rust, the method names are not random—they follow a strict naming philosophy based on the data structure's mechanics:
+
+1. **Sequences (`Vec`, `String`)** use stack terms: **`push`** and **`pop`** at the end, and **`insert`** / **`remove`** by index.
+2. **Keyed / Set collections (`HashMap`, `HashSet`)** use: **`insert`** and **`remove`** by key/value.
+3. **Double-ended queues (`VecDeque`)** use: **`push_back` / `push_front`** and **`pop_back` / `pop_front`**.
+
+Here is the complete cross-language reference mapping Python methods to Rust methods:
+
+---
+
+### 1. `Vec<T>` vs. Python `list`
+
+| Operation | Python (`list`) | Rust (`Vec<T>`) | Time Complexity |
+| :--- | :--- | :--- | :--- |
+| **Add to end** | `lst.append(x)` | `vec.push(x);` | $O(1)$ amortized |
+| **Remove from end** | `lst.pop()` | `vec.pop()` $\rightarrow$ `Option<T>` | $O(1)$ |
+| **Insert at index** | `lst.insert(i, x)` | `vec.insert(i, x);` | $O(n)$ (shifts right) |
+| **Remove by index** | `del lst[i]` or `lst.pop(i)`| `vec.remove(i);` | $O(n)$ (shifts left) |
+| **Fast remove (unordered)** | *(Not built-in)* | `vec.swap_remove(i);` | **$O(1)$** (swaps with last) |
+| **Combine lists** | `lst.extend(other)` | `vec.extend(other);` | $O(k)$ |
+| **Clear all** | `lst.clear()` | `vec.clear();` | $O(n)$ |
+| **Check length** | `len(lst)` | `vec.len()` | $O(1)$ |
+| **Check empty** | `len(lst) == 0` or `not lst` | `vec.is_empty()` | $O(1)$ |
+
+> **Pro Tip:** In LeetCode, if you don't care about preserving the array's order, `vec.swap_remove(i)` is **$O(1)$** because it simply swaps item `i` with the last item and pops it, avoiding the expensive $O(n)$ shift!
+
+---
+
+### 2. `String` vs. Python `str`
+
+In Python, strings are immutable. In Rust, `String` is essentially a growable `Vec<u8>` guaranteed to be valid UTF-8:
+
+| Operation | Python (`str`) | Rust (`String`) |
+| :--- | :--- | :--- |
+| **Add single char** | `s += 'a'` | `s.push('a');` |
+| **Add string slice** | `s += "hello"` | `s.push_str("hello");` |
+| **Remove last char** | `s = s[:-1]` | `s.pop()` $\rightarrow$ `Option<char>` |
+| **Insert at byte index** | `s[:i] + "x" + s[i:]` | `s.insert(i, 'x');` |
+| **Remove by byte index** | `del s[i]` | `s.remove(i);` |
+| **Clear** | `s = ""` | `s.clear();` |
+
+---
+
+### 3. `HashSet<T>` vs. Python `set`
+
+| Operation | Python (`set`) | Rust (`HashSet<T>`) |
+| :--- | :--- | :--- |
+| **Import** | Built-in | `use std::collections::HashSet;` |
+| **Add item** | `s.add(x)` | `s.insert(x);` *(returns `bool`: true if new)* |
+| **Check exists** | `x in s` | `s.contains(&x)` |
+| **Remove item** | `s.remove(x)` | `s.remove(&x);` *(returns `bool` if existed)* |
+| **Length / Empty** | `len(s)` / `not s` | `s.len()` / `s.is_empty()` |
+
+---
+
+### 4. `HashMap<K, V>` vs. Python `dict`
+
+| Operation | Python (`dict`) | Rust (`HashMap<K, V>`) |
+| :--- | :--- | :--- |
+| **Import** | Built-in | `use std::collections::HashMap;` |
+| **Insert / Update** | `d[k] = v` | `map.insert(k, v);` |
+| **Lookup (safe)** | `d.get(k)` | `map.get(&k)` $\rightarrow$ returns `Option<&V>` |
+| **Check key** | `k in d` | `map.contains_key(&k)` |
+| **Delete key** | `del d[k]` or `d.pop(k)` | `map.remove(&k);` $\rightarrow$ returns `Option<V>` |
+| **Counter pattern** | `d[k] = d.get(k, 0) + 1` | `*map.entry(k).or_insert(0) += 1;` |
+
+---
+
+### 5. `VecDeque<T>` vs. Python `collections.deque` (Queue / BFS)
+
+When doing BFS or Queue problems in LeetCode:
+
+| Operation | Python (`deque`) | Rust (`VecDeque<T>`) |
+| :--- | :--- | :--- |
+| **Import** | `from collections import deque` | `use std::collections::VecDeque;` |
+| **Push right (back)** | `q.append(x)` | `q.push_back(x);` |
+| **Push left (front)** | `q.appendleft(x)` | `q.push_front(x);` |
+| **Pop right (back)** | `q.pop()` | `q.pop_back()` $\rightarrow$ `Option<T>` |
+| **Pop left (front)** | `q.popleft()` | `q.pop_front()` $\rightarrow$ `Option<T>` |
+
+---
+
+### 6. `BinaryHeap<T>` vs. Python `heapq` (Priority Queue)
+
+| Operation | Python (`heapq`) | Rust (`BinaryHeap<T>`) |
+| :--- | :--- | :--- |
+| **Import** | `import heapq` | `use std::collections::BinaryHeap;` |
+| **Push** | `heapq.heappush(h, x)` | `heap.push(x);` |
+| **Pop** | `heapq.heappop(h)` | `heap.pop()` $\rightarrow$ `Option<T>` |
+| **Peek top** | `h[0]` | `heap.peek()` $\rightarrow$ `Option<&T>` |
+| **Default order** | **Min-heap** (smallest first) | **Max-heap** (largest first) |
+
+> ⚠️ **Major difference:** Python's `heapq` is a **Min-Heap** by default. Rust's `BinaryHeap` is a **Max-Heap** by default. To make Rust a min-heap, wrap elements in `std::cmp::Reverse(x)`.
+
+---
+
+### Why Python uses `append()` while Rust uses `push()`
+* Python borrowed `append` from list terminology (`L.append(x)`).
+* Rust follows standard systems programming convention (C++, Assembly): a growable contiguous buffer is treated as a stack with **`push`** and **`pop`** at the top/tail.
 
 ---
 
