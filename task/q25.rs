@@ -2,11 +2,11 @@ use axum::{
     Json, Router,
     extract::{Path, State},
     http::StatusCode,
-    routing::{delete, get},
+    routing::{delete, get}, //note we did not use post method, it is already comes with get.
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex}; 
 
 // --- Data models ---
 
@@ -25,7 +25,7 @@ struct CreateTodo {
 // Shared thread-safe in-memory database
 // Arc  = lets multiple threads hold a pointer to the same data
 // Mutex = only one thread can read/write the HashMap at a time
-type AppState = Arc<Mutex<HashMap<u64, Todo>>>;
+type AppState = Arc<Mutex<HashMap<u64, Todo>>>; //just alias
 
 // --- Handlers ---
 
@@ -60,10 +60,7 @@ async fn create_todo(
 }
 
 // DELETE /todos/:id → remove a todo by id
-async fn delete_todo(
-    State(state): State<AppState>,
-    Path(id): Path<u64>,
-) -> StatusCode {
+async fn delete_todo(State(state): State<AppState>, Path(id): Path<u64>) -> StatusCode {
     let mut db = state.lock().unwrap();
 
     if db.remove(&id).is_some() {
@@ -98,3 +95,68 @@ async fn main() {
     // Start serving
     axum::serve(listener, app).await.unwrap();
 }
+
+/*
+================================================================================
+                    DETAILED EXPLANATION OF Q25 CONCEPTS
+================================================================================
+
+1. SHARED IN-MEMORY STATE (`AppState`):
+   ------------------------------------
+   - `type AppState = Arc<Mutex<HashMap<u64, Todo>>>;` is a TYPE ALIAS (shortcut).
+   - `HashMap`: The "database" here is just a standard Rust HashMap living in RAM.
+     `db.insert()` and `db.remove()` are standard HashMap methods.
+   - `Mutex`: Mutual Exclusion. Guarantees that only ONE thread/request can read
+     or mutate the HashMap at any given millisecond, preventing data races.
+   - `Arc`: Atomic Reference Counted pointer. Allows multiple concurrent HTTP
+     worker threads to share ownership of the single Mutex on the heap.
+   - `state.lock().unwrap()`:
+     * Acquires the lock and returns a `MutexGuard`.
+     * `.unwrap()`: If another thread panicked while holding the lock, the mutex
+       is "poisoned", and this thread will panic too instead of touching corrupted data.
+     * When the guard variable (`db`) goes out of scope at the end of the function,
+       Rust's RAII automatically releases the lock!
+
+2. ROUTING & METHOD CHAINING:
+   ---------------------------
+   - `.route("/todos", get(list_todos).post(create_todo))`
+   - Why didn't we import `post` in `use axum::routing::{delete, get}`?
+     Because `get(list_todos)` returns a `MethodRouter` object, and that object
+     has `.post(...)` built-in as a method!
+   - Why on one line?
+     Both `GET /todos` (fetch all) and `POST /todos` (create new) share the SAME
+     URL path. In Axum, calling `.route("/todos", ...)` twice will PANIC at runtime
+     due to duplicate path registration. Methods on the same path must be chained
+     or merged.
+
+3. AXUM EXTRACTORS:
+   -----------------
+   - Handlers take "Extractors" as parameters:
+     * `State(state)`: Axum injects a clone of the shared `Arc<Mutex<...>>`.
+     * `Json(input)`: Parses the incoming JSON body into the `CreateTodo` struct.
+     * `Path(id)`: Extracts `{id}` from the URL path (`/todos/{id}`) and parses it
+       into `u64`. (Note: This is an HTTP URL path, NOT Python's filesystem `pathlib`).
+
+4. SERDE (Serialize / Deserialize):
+   ---------------------------------
+   - Tokio does NOT need Serde (Tokio only manages async tasks/timers).
+   - Axum DOES need Serde whenever sending or receiving JSON:
+     * `#[derive(Serialize)]`: Converts Rust struct -> JSON text (outgoing response).
+     * `#[derive(Deserialize)]`: Converts JSON text -> Rust struct (incoming request).
+
+5. HTTP STATUS CODES:
+   --------------------
+   - `StatusCode::CREATED` (201), `StatusCode::NO_CONTENT` (204), `StatusCode::NOT_FOUND` (404)
+     are type-safe constants defined in the `http` crate (`status.rs`). They prevent
+     typos compared to raw magic numbers like `201` or `404`.
+
+6. TESTING WITH CURL (PowerShell):
+   -------------------------------
+   - Create Todo:
+     curl.exe -X POST http://127.0.0.1:3000/todos -H "Content-Type: application/json" -d "{\"title\": \"Learn Rust\"}"
+   - Get Todos:
+     curl.exe http://127.0.0.1:3000/todos
+   - Delete Todo #1:
+     curl.exe -X DELETE http://127.0.0.1:3000/todos/1
+================================================================================
+*/
