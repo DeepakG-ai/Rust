@@ -13,7 +13,7 @@ fn parse_age(raw: &str) -> Result<u32, String> {
 
 fn parse_two(a: &str, b: &str) -> Result<u32, String> {
     let a_val = parse_age(a)?; // if Err, return it immediately. If Ok, unwrap the value.
-    let b_val = parse_age(b)?;
+    let b_val = parse_age(b)?; 
     Ok(a_val + b_val)
 }
 

@@ -886,3 +886,14 @@ i32::MAX is the largest possible value a 32-bit signed integer can hold:
 2,147,483,647(≈2.14 billion, or 2 
 31
  −1)
+
+
+ ### Unwrap and ? 
+     let a_val = parse_age(a)?; // if Err, return it immediately. If Ok, unwrap the value.
+ ? --> it returns Err to the caller, the program does not crash. It hands the error upto whoever called the function
+
+ If a user submits invalid data (e.g. typing "abc" into an age field), you don't want the entire server to crash for all connected users.
+With ?, the handler returns an Err, Axum converts it into a 400 Bad Request HTTP response for that single user, and the server stays alive.
+
+
+ unwrap() --> it panics (crashes) . The program/thread terminates immediately.
