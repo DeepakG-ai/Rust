@@ -1,6 +1,6 @@
 fn retry<F, T, E>(attempts: u32, mut operation: F) -> Result<T, E>
 where
-    F: FnMut(u32) -> Result<T, E>,
+    F: FnMut(u32) -> Result<T, E>, //FnMut is the Trait."I will accept any type F, WHERE F implements the FnMut trait — meaning it is callable with a u32 argument and returns a Result<T, E>."
 {
     for attempt in 1..=attempts {
         match operation(attempt) {
@@ -25,9 +25,14 @@ fn ping_service(attempt: u32) -> Result<String, String> {
     }
 }
 
+// |attempt| is just the parameter list (like (attempt) in a normal function) closure( anonymous funtion) which is similar to Lamda function in python
+//attempt| {
+//  if attempt < 3 { ... }}
+
 fn main() {
     println!("=== 1. Closure that fails twice, then succeeds ===");
     let result1 = retry(3, |attempt| {
+        // |attempt| is just the parameter list (like (attempt) in a normal function)
         if attempt < 3 {
             Err(String::from("connection timeout"))
         } else {
@@ -42,12 +47,15 @@ fn main() {
     println!("=== 2. Closure that captures a counter and mutates it ===");
     let mut call_count = 0;
     let result2 = retry(3, |attempt| {
-        call_count += 1;
+        call_count += 1; ////  Modifies an outside variable!
         if attempt < 2 {
             Err(String::from("rate limited"))
         } else {
             Ok(format!("recovered after {call_count} attempts"))
         }
+
+        //If retry had used F: Fn(...), Rust would say:"Error: you passed a closure that modifies call_count, but retry only accepts read-only (Fn) closures!"
+        //if retry had used FnOnce(...), Rust would say: "Error: retry is calling operation 3 times in a loop, but FnOnce can only be called once!"
     });
     match result2 {
         Ok(val) => println!("Success: {val}\n"),
