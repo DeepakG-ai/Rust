@@ -1,3 +1,20 @@
+// ============================================================================
+// ## Q21 — Valid Anagram (String)
+//
+// ```rust
+// fn is_anagram(s: String, t: String) -> bool
+// ```
+//
+// Examples:
+// - "anagram", "nagaram"  ->  true
+// - "rat", "car"          ->  false
+// - "ab", "a"             ->  false
+//
+// Hint: different lengths → immediately false. Then count characters of s in
+// a HashMap<char, i32>, subtract the counts of t, and check nothing is left
+// over. `s.chars()` gives you characters.
+// ============================================================================
+
 use std::collections::HashMap;
 
 fn is_anagram(s: String, t: String) -> bool {
@@ -38,4 +55,3 @@ fn main() {
     let result3 = is_anagram(String::from("ab"), String::from("a"));
     println!("\"ab\", \"a\" -> {}", result3);
 }
-

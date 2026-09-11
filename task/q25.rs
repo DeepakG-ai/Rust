@@ -1,3 +1,19 @@
+// ============================================================================
+// ## Q25 — Axum In-Memory CRUD with Shared State (Arc<Mutex<HashMap>>)
+//
+// Web servers handle multiple requests at the same time on different threads.
+// To safely share mutable data (like an in-memory database) across handlers,
+// Rust uses Arc<Mutex<T>>.
+//
+// Build a complete In-Memory Todo CRUD API:
+// - Models: Todo { id, title, completed }, CreateTodo { title }
+// - State: type AppState = Arc<Mutex<HashMap<u64, Todo>>>;
+// - Endpoints:
+//   - GET /todos → returns Json<Vec<Todo>>
+//   - POST /todos → accepts Json<CreateTodo>, returns 201 Created + Json<Todo>
+//   - DELETE /todos/:id → removes item, returns 204 No Content or 404 Not Found
+// ============================================================================
+
 use axum::{
     Json, Router,
     extract::{Path, State},

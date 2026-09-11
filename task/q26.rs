@@ -1,3 +1,19 @@
+// ============================================================================
+// ## Q26 — Unit tests (#[cfg(test)])
+//
+// Write a module with three functions, then test all three:
+// - `fn is_even(n: i32) -> bool`
+// - `fn average(nums: &[f64]) -> Option<f64>` (None when empty)
+// - `fn parse_age(s: &str) -> Result<u32, String>` (Err if not a number or > 150)
+//
+// Add `#[cfg(test)] mod tests` and test all three.
+// Run with: `cargo test --bin q26`
+//
+// Questions to answer in a comment:
+// 1. What does `use super::*;` do?
+// 2. Why does `#[cfg(test)]` mean the test code is not in your release binary?
+// ============================================================================
+
 #![allow(dead_code)]
 
 fn is_even(n: i32) -> bool {

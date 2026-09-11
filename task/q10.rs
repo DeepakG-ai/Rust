@@ -1,3 +1,26 @@
+// ============================================================================
+// ## Q10 — your first trait
+//
+// Define:
+// ```rust
+// trait Describe {
+//     fn describe(&self) -> String;
+// }
+// ```
+//
+// Implement it manually for two different structs: Employee (from Q5) and
+// ```rust
+// struct Product {
+//     name: String,
+//     price: f64,
+// }
+// ```
+//
+// Then write `fn print_description<T: Describe>(item: &T)` and call it with both.
+//
+// The point: one function, two unrelated types. That is what a trait buys you.
+// ============================================================================
+
 trait Describe {
     fn describe(&self)->String;
 }
@@ -49,5 +72,3 @@ fn main (){
     print_description(&p);
 
 }
-
-

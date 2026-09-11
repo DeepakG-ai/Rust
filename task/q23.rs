@@ -1,3 +1,21 @@
+// ============================================================================
+// ## Q23 — Tokio basics (async, await, and tokio::spawn)
+//
+// In Rust, async fn does not run on its own like Python's asyncio or JavaScript.
+// It produces a Future that sits idle until driven by an async runtime (Tokio) using .await.
+//
+// Write a program using #[tokio::main]:
+// 1. Write `async fn fetch_user_data(user_id: u32, delay_ms: u64) -> String` that:
+//    - sleeps asynchronously with `tokio::time::sleep(tokio::time::Duration::from_millis(delay_ms)).await`
+//    - returns `format!("User {user_id} data loaded")`
+// 2. In main:
+//    - spawn 3 concurrent tasks with `tokio::spawn` for IDs 1, 2, 3 with delays 300ms, 100ms, 200ms
+//    - await all three JoinHandle results
+//    - print the elapsed time and results
+//
+// Hint: `tokio::spawn` moves the future to Tokio's background thread pool.
+// ============================================================================
+
 use std::time::Instant;
 
 //tokio::spawn  →  creates a lightweight Tokio Task (green thread)

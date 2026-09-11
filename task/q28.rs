@@ -1,3 +1,24 @@
+// ============================================================================
+// ## Q28 — Closures (Fn, FnMut, FnOnce)
+//
+// Rewrite Q19's retry so the operation is a parameter instead of hardcoded:
+// ```rust
+// fn retry<F, T, E>(attempts: u32, mut operation: F) -> Result<T, E>
+// where
+//     F: FnMut(u32) -> Result<T, E>,
+// ```
+//
+// Call it three ways:
+// 1. with a closure that fails twice then succeeds
+// 2. with a closure that captures a counter from enclosing scope and mutates it
+// 3. with a plain function passed by name (no closure at all)
+//
+// Questions answered in comments below:
+// - Why is the bound FnMut and not Fn?
+// - What breaks if you change it to Fn?
+// - What breaks if you change it to FnOnce?
+// ============================================================================
+
 fn retry<F, T, E>(attempts: u32, mut operation: F) -> Result<T, E>
 where
     F: FnMut(u32) -> Result<T, E>, //FnMut is the Trait."I will accept any type F, WHERE F implements the FnMut trait — meaning it is callable with a u32 argument and returns a Result<T, E>."

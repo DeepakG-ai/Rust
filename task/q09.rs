@@ -1,3 +1,20 @@
+// ============================================================================
+// ## Q9 — Result and ?
+//
+// Write:
+// - `fn parse_age(raw: &str) -> Result<u32, String>`:
+//   - not a number → `Err("not a number: abc")`
+//   - over 150 → `Err("age out of range: 200")`
+//   - otherwise → `Ok(n)`
+// - `fn parse_two(a: &str, b: &str) -> Result<u32, String>`: parses both and
+//   returns their sum, using the `?` operator so the first failure stops it
+//
+// In `main`, test with `("30", "12")`, `("30", "abc")`, `("200", "10")`.
+//
+// Hint: `?` means "if this is an Err, return it from this function right now".
+// It is Rust's version of letting an exception bubble up.
+// ============================================================================
+
 fn parse_age(raw: &str) -> Result<u32, String> {
     let r = match raw.parse::<u32>() {
         Ok(r) => r,

@@ -1,3 +1,22 @@
+// ============================================================================
+// ## Q14 — generic struct
+//
+// ```rust
+// struct Pair<T> {
+//     first: T,
+//     second: T,
+// }
+// ```
+//
+// Write:
+// - `fn new(first: T, second: T) -> Pair<T>` (in `impl<T> Pair<T>`)
+// - `fn swap(&mut self)`
+// - `fn largest(&self) -> &T` — but this one only exists when `T: PartialOrd`,
+//   so put it in a separate `impl<T: PartialOrd> Pair<T>` block
+//
+// Test with `Pair<i32>` and `Pair<String>`.
+// ============================================================================
+
 struct Pair<T>{
     first:T,
     second:T,
@@ -43,5 +62,3 @@ fn main() {
     words.swap();
     println!("After swap: first = {}, second = {}", words.first, words.second);
 }
-
-

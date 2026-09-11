@@ -1,3 +1,18 @@
+// ============================================================================
+// ## Q13 — generic function
+//
+// Write `fn largest<T: PartialOrd>(list: &[T]) -> &T` that returns the biggest
+// item.
+//
+// Call it with:
+// - `&[34, 50, 25, 100, 65]`
+// - `&[1.2, 9.8, 3.3]`
+// - `&["apple", "zebra", "mango"]`
+//
+// One function, three different types. No copy-paste.
+//
+// Hint: `T: PartialOrd` means "any type T that can be compared with `>`".
+// ============================================================================
 
 fn largest<T:PartialOrd>(list:&[T])->&T{
     let mut biggest = &list[0];

@@ -1,3 +1,16 @@
+// ============================================================================
+// ## Q8 — Option
+//
+// Using the Employee struct from Q5, write:
+// - `fn find_by_name<'a>(employees: &'a Vec<Employee>, name: &str) -> Option<&'a Employee>`
+// - `fn highest_paid(employees: &Vec<Employee>) -> Option<&Employee>` — None when empty
+//
+// In `main`, handle both results with `match` — print the person when found,
+// print `"not found"` when not.
+//
+// Hint: this is Rust's replacement for `None` in Python. There is no `null`.
+// ============================================================================
+
 struct Employee {
     name: String,
     monthly_salary: f64,

@@ -1,3 +1,25 @@
+// ============================================================================
+// ## Q5 — struct and methods
+//
+// ```rust
+// struct Employee {
+//     name: String,
+//     monthly_salary: f64,
+//     years: u32,
+// }
+// ```
+//
+// Write an `impl Employee` block with:
+// - `fn new(name: &str, monthly_salary: f64, years: u32) -> Employee`
+// - `fn annual_salary(&self) -> f64`
+// - `fn is_senior(&self) -> bool` — 5 years or more
+// - `fn summary(&self) -> String` — `"Asha: 1200000 per year (senior)"`
+//
+// In `main`, make a `Vec<Employee>` with 3 people and print every summary.
+//
+// Hint: `&self` = read the struct. `Self` is shorthand for the struct's own type.
+// ============================================================================
+
 struct Employee {
     name: String,
     monthly_salary: f64,

@@ -1,3 +1,25 @@
+// ============================================================================
+// ## Q15 — lifetimes
+//
+// Write:
+// - `fn longest<'a>(a: &'a str, b: &'a str) -> &'a str` — the longer string
+// - a struct that holds a borrowed string:
+// ```rust
+// struct Highlight<'a> {
+//     text: &'a str,
+// }
+// ```
+// with a method `fn first_sentence(&self) -> &str`.
+//
+// In `main`, build a `String`, create a `Highlight` borrowing it, and print.
+//
+// Then break it on purpose: make the `String` go out of scope while the
+// `Highlight` is still alive. Read the error, write it in a comment.
+//
+// Hint: `'a` does not change behaviour. It only tells the compiler "the output
+// borrows from the input, so the input must outlive it".
+// ============================================================================
+
 struct Highlight<'a> {
     text: &'a str,
 }

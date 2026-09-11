@@ -1,3 +1,25 @@
+// ============================================================================
+// ## Q22 — Number of Islands (Graph)
+//
+// Given a grid of `'1'` (land) and `'0'` (water), count the islands. Land
+// connects horizontally and vertically, not diagonally.
+//
+// ```rust
+// fn num_islands(grid: Vec<Vec<char>>) -> i32
+// ```
+//
+// Example:
+// [['1','1','0','0','0'],
+//  ['1','1','0','0','0'],
+//  ['0','0','1','0','0'],
+//  ['0','0','0','1','1']]        ->  3
+//
+// Hint: walk every cell. When you hit a `'1'`, add 1 to the count and then
+// "sink" the whole island — recursively set that cell and its 4 neighbours to
+// `'0'` so you never count it twice. Your recursive helper needs
+// `&mut Vec<Vec<char>>` and must stop at the grid edges.
+// ============================================================================
+
 fn sink(grid: &mut Vec<Vec<char>>, r: usize, c: usize) {
     let rows = grid.len();
     let cols = grid[0].len();

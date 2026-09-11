@@ -1,3 +1,23 @@
+// ============================================================================
+// ## Q17 — HashMap
+//
+// Write `fn word_count(text: &str) -> HashMap<String, usize>` that counts words,
+// lowercased.
+//
+// In `main`, run it on `"the quick the lazy THE dog"`, then print the counts
+// sorted by word so the output is stable.
+//
+// Expected:
+// dog: 1
+// lazy: 1
+// quick: 1
+// the: 3
+//
+// Hint: `use std::collections::HashMap;` at the top.
+// `*map.entry(key).or_insert(0) += 1;` is the whole trick.
+// To sort, collect into a `Vec` and call `.sort()`.
+// ============================================================================
+
 use std::collections::HashMap;
 
 fn word_count(text:&str)->HashMap<String,usize>{

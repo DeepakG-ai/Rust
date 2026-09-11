@@ -1,3 +1,21 @@
+// ============================================================================
+// ## Q24 — Axum REST API (Router, Handlers, JSON)
+//
+// Axum is Rust's most popular web framework (built on Tokio and Tower).
+//
+// Write an HTTP web server:
+// - Model: `User { id: u64, name: String, role: String }`
+// - Routes:
+//   - `GET /` → returns plain text `"Welcome to Rust Axum Server!"`
+//   - `GET /users/{id}` → extracts path param `:id`, returns JSON User
+//   - `POST /users` → receives JSON User body, prints it, returns 201 Created + JSON
+//
+// In `main`:
+// - build the `Router::new()`
+// - bind to `127.0.0.1:3000`
+// - start server with `axum::serve`
+// ============================================================================
+
 use axum::{
     Json,
     Router,

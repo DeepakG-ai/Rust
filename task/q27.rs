@@ -1,3 +1,20 @@
+// ============================================================================
+// ## Q27 — Your own error type
+//
+// Write a config loader that can fail three different ways:
+// - `ConfigError::NotFound { path }`
+// - `ConfigError::BadPort { value }`
+// - `ConfigError::Empty`
+//
+// 1. `impl Display for ConfigError`
+// 2. `impl std::error::Error for ConfigError {}`
+// 3. `impl From<ParseIntError> for ConfigError` so that `?` converts automatically.
+// 4. `fn load(text: &str) -> Result<u16, ConfigError>` using bare `?` on `.parse()`.
+//
+// Question to answer in a comment:
+// - Which of your impls is what makes the bare `?` work on the parse() call?
+// ============================================================================
+
 use std::fmt::{Debug, Display};
 
 #[derive(Debug)]

@@ -1,3 +1,25 @@
+// ============================================================================
+// ## Q20 — Two Sum (Vec)
+//
+// `nums: Vec<i32>`, `target: i32`. Return the indices of the two numbers
+// that add up to `target`. Exactly one answer exists.
+//
+// ```rust
+// fn two_sum(nums: Vec<i32>, target: i32) -> Vec<i32>
+// ```
+//
+// Examples:
+// - nums = [2, 7, 11, 15], target = 9   ->  [0, 1]
+// - nums = [3, 2, 4],      target = 6   ->  [1, 2]
+// - nums = [3, 3],         target = 6   ->  [0, 1]
+//
+// Do the nested-loop version first. Then redo it with a HashMap so it makes
+// one pass. Keep both.
+//
+// Hint for the fast version: as you walk the list, ask the map "have I already
+// seen `target - current`?" before inserting the current number.
+// ============================================================================
+
 use std::collections::HashMap;
 
 fn two_sum(nums:Vec<i32>,target:i32)->Vec<i32>{

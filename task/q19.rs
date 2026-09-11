@@ -1,3 +1,18 @@
+// ============================================================================
+// ## Q19 — retry with backoff (your API question, in Rust)
+//
+// Write `fn call_api(url: &str) -> Result<String, String>` that:
+// - tries up to 3 times
+// - sleeps 2 seconds between attempts (not after the last one)
+// - logs every attempt as `attempt 1/3 failed: connection refused — retrying in 2s`
+// - returns `Ok(body)` as soon as one succeeds
+// - returns `Err("all 3 attempts failed")` after the third failure
+//
+// In `main`, call it and print the final result.
+//
+// Hint: `use std::thread::sleep;` and `use std::time::Duration;`
+// ============================================================================
+
 use std::thread::sleep;
 use std::time::Duration;
 

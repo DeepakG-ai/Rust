@@ -1,3 +1,25 @@
+// ============================================================================
+// ## Q11 — default method in a trait
+//
+// Extend the Describe trait with a second method that has a body already
+// written inside the trait:
+//
+// ```rust
+// trait Describe {
+//     fn describe(&self) -> String;
+//
+//     fn short_label(&self) -> String {
+//         format!("<{}>", self.describe())
+//     }
+// }
+// ```
+//
+// - Employee uses the default short_label
+// - Product overrides it to return "$29.99" style instead
+//
+// Print both labels in main.
+// ============================================================================
+
 trait Describe{
     fn describe(&self)->String;
 
@@ -55,5 +77,3 @@ fn main (){
     println!("{}", p.short_label());
 
 }
-
-

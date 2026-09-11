@@ -1,3 +1,26 @@
+// ============================================================================
+// ## Q7 — enum and match
+//
+// ```rust
+// enum Status {
+//     Active,
+//     Suspended { reason: String },
+//     Closed(String),   // closing date
+// }
+// ```
+//
+// Write `fn status_message(status: &Status) -> String` using a `match` that
+// returns:
+// - `Active`    → `"Account is active"`
+// - `Suspended` → `"Suspended: payment overdue"`
+// - `Closed`    → `"Closed on 2026-01-15"`
+//
+// In `main`, put all three in a `Vec<Status>` and print each message.
+//
+// Hint: `match` must cover every variant — the compiler enforces it. That is a
+// feature, not a nuisance.
+// ============================================================================
+
 enum Status {
     Active,
     Suspended { reason: String }, //Suspended(reason:String) not like this. it is curly. so status_message-> Status::Suspended { reason }

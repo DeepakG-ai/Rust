@@ -1,3 +1,27 @@
+// ============================================================================
+// ## Q6 — `&mut self`
+//
+// ```rust
+// struct BankAccount {
+//     owner: String,
+//     balance: f64,
+// }
+// ```
+//
+// Methods:
+// - `fn new(owner: &str) -> BankAccount` — starts at 0.0
+// - `fn deposit(&mut self, amount: f64)`
+// - `fn withdraw(&mut self, amount: f64) -> bool` — refuse and return `false` if
+//   the balance is too low, otherwise subtract and return `true`
+// - `fn balance(&self) -> f64`
+//
+// In `main`, declare it as `let mut account = ...`, deposit 500, withdraw 200,
+// try to withdraw 1000, print the result of each attempt and the final balance.
+//
+// Question to answer in a comment:
+// - Why does `deposit` need `&mut self` but `balance` only needs `&self`?
+// ============================================================================
+
 struct BankAccount {
 	owner:String,
 	balance:f64,

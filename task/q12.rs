@@ -1,3 +1,24 @@
+// ============================================================================
+// ## Q12 — trait objects (dyn)
+//
+// Take Q10's types and put them in the same Vec:
+//
+// ```rust
+// let items: Vec<Box<dyn Describe>> = vec![
+//     Box::new(employee),
+//     Box::new(product),
+// ];
+// ```
+//
+// Loop over it and print every description.
+//
+// Question to answer in a comment:
+// - Why does this need `Box<dyn Describe>` instead of `Vec<T>` like Q10 used?
+//
+// Hint: a `Vec` needs all its elements to be the same type and the same size.
+// `Box<dyn Trait>` makes them all the same size — a pointer.
+// ============================================================================
+
 trait Describe{
     fn describe(&self)->String;
 }

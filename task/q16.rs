@@ -1,3 +1,18 @@
+// ============================================================================
+// ## Q16 — iterators (rewrite of Q1 and Q3)
+//
+// Rewrite these using iterator chains, no for loop at all:
+// - Q1's sum → `(1..=20).filter(..).sum()`
+// - Q3's total → `prices.iter().sum()`
+// - new: from `vec![15, 8, 42, 4, 23, 16]`, produce a `Vec<String>` of only the
+//   numbers over 10, formatted as `"n=15"`
+// - new: count how many are even
+//
+// Keep the old for version in a comment above each so you can see them side by side.
+//
+// Hint: `.iter()` → `.filter()` / `.map()` → `.collect()` or `.sum()` or `.count()`.
+// ============================================================================
+
 fn main() {
     // ── Q1 rewrite: sum of 1..=20, skipping multiples of 3 ──
 

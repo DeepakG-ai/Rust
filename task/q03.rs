@@ -1,3 +1,18 @@
+// ============================================================================
+// ## Q3 — borrow vs move (the important one)
+//
+// Write two functions that both add up a list of prices:
+// - `fn total_borrowed(prices: &Vec<f64>) -> f64`
+// - `fn total_owned(prices: Vec<f64>) -> f64`
+//
+// In `main`:
+// 1. build `let prices = vec![10.5, 20.0, 3.25];`
+// 2. call `total_borrowed(&prices)` — then print `prices` again. Works.
+// 3. call `total_owned(prices)` — then try to print `prices` again.
+// 4. The compiler will refuse. Read the error message fully, then comment
+//    that line out and write the error as a comment in your file.
+// ============================================================================
+
 fn main (){
     let prices = vec![10.5,20.0, 3.25];
     let ans1 = total_borrowed(&prices);

@@ -1,3 +1,22 @@
+// ============================================================================
+// ## Q4 — `String` vs `&str`
+//
+// Write:
+// - `fn shout(text: &str) -> String` — uppercase, with `"!"` on the end
+// - `fn first_word(text: &str) -> &str` — the text up to the first space
+// - `fn add_prefix(text: &mut String, prefix: &str)` — inserts at the front,
+//   changing the caller's variable
+//
+// In `main`, prove all three work.
+//
+// Expected:
+// HELLO WORLD!
+// hello
+// [LOG] hello world
+//
+// Hint: `split_whitespace().next()`, and `insert_str(0, ..)`.
+// ============================================================================
+
 //Parameters: use &str (90% of the time) Return new string: use String
 //&str, will at stack. not heap because it memory is fixed. we can't use text.push_str() like that. Sting will on heap. so it will dynamicaly change
 
