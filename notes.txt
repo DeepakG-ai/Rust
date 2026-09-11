@@ -1,4 +1,5 @@
-user logged in
-raw bytes
-user logged in
-raw bytes is this new one
+Line 1: System booted successfully
+Line 2: Error: disk space running low on /dev/sda1
+Line 3: Warning: high memory consumption detected
+Line 4: fatal ERROR: database connection pool exhausted
+Line 5: Info: temporary error resolved automatically
