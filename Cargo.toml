@@ -196,3 +196,7 @@ path = "task/q34.rs"
 [[bin]]
 name = "q35"
 path = "task/q35.rs"
+
+[[bin]]
+name = "closure"
+path = "src/closure.rs"
