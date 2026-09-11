@@ -25,10 +25,17 @@
 use std::fs::{File, OpenOptions};
 use std::io::{self, BufRead, BufReader, Write};
 
-fn count_errors(path: &str) -> io::Result<usize> {
-    todo!("Open file with BufReader and count lines containing 'error' case-insensitively")
-}
+//fn count_errors(path: &str) -> io::Result<usize> {
+//    todo!("Open file with BufReader and count lines containing 'error' case-insensitively")
+//}
 
 fn main() -> io::Result<()> {
-    todo!("Q29 implementation")
+    //let mut f = File::create("notes.txt")?; //underhood truncate(true) is also activate which destroy the data
+    let mut f = OpenOptions::new()
+        .append(true)
+        .create(true)
+        .open("notes.txt")?;
+    writeln!(f, "user logged in")?;
+    f.write_all(b"raw bytes is this new one\n")?;
+    Ok(())
 }
