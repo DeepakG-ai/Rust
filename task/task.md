@@ -1008,7 +1008,8 @@ storage layer? Write down which you chose and why.
 
 *Hint: `impl IntoResponse for AppError` is what lets a handler return
 `Result<Json<User>, AppError>` and have axum turn the error into an HTTP
-response automatically. That one impl removes every `match` from your handlers.*
+response automatically. That one impl centralizes conversion of application errors
+into HTTP responses.*
 
 ---
 ## Progress
@@ -1053,7 +1054,7 @@ response automatically. That one impl removes every `match` from your handlers.*
 
 - [ ] Q33 tracing
 - [ ] Q34 sqlx + SQLite
-- [ ] Q35 capstone: Axum + sqlx + tracing + tests
+- [x] Q35 capstone: Axum + sqlx + tracing + tests
 
 ---
 

@@ -3,3 +3,5 @@ target/
 *.exe
 *.pdb
 .vscode/
+
+/.lab-exams/
