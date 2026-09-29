@@ -29,19 +29,32 @@ fn main(){
     println!("{} ",text);
 
 }
-fn shout(text:&str)->String{
+fn shout(text: &str) -> String {
+    // text.to_uppercase() allocates a brand-new `String` on the heap.
+    // result is `String` (not &str), so it owns its buffer and CAN grow with `.push()`.
+    // Note: `text` itself is untouched and never grows.
     let mut result = text.to_uppercase();
-    result.push('!'); //new string output, so String
+    result.push('!');
     result
 }
 
-fn first_word(text:&str)->&str{ //first_word(text: &str) -> &str — reads input, returns a piece of it
+fn first_word(text: &str) -> &str {
+    // Both of these work identically:
+    // Option 1 (direct):
     text.split_whitespace().next().unwrap()
-    //let t = text.split_whitespace().next().unwrap(); if return text, it will not work, becuase not storing or saving anywhere. 
-    //return t;
-   
+
+    // Option 2 (with variable):
+    // let t = text.split_whitespace().next().unwrap();
+    // return t; // Works! `t` is a &str slice pointing to the first word ("hello").
+    //
+    // Note: `return text;` would NOT work to get the first word because `split_whitespace()`
+    // does not mutate `text`. `text` still points to the full string ("hello world").
 }
-fn add_prefix(text:&mut String, prefix: &str){ //add_prefix(text: &mut String, prefix: &str) — modifies the String, so needs &mut String
+
+fn add_prefix(text: &mut String, prefix: &str) {
+    // Must be `&mut String`, NOT `&mut str`:
+    // - `String` owns a heap buffer with capacity and can grow when inserting characters.
+    // - `str` has a fixed length with no allocator, so it cannot grow or shrink.
+    // - That is why `insert_str` exists on `String`, but not on `str` or `&mut str`.
     text.insert_str(0, prefix);
 }
-// if we return like that
