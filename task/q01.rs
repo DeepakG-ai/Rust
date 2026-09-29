@@ -18,20 +18,22 @@
 // Hint: `for n in 1..=20 { }`, and `continue` skips to the next iteration.
 // ============================================================================
 
-fn main (){
-    let total: i32= 0; // let mut total:i32=0 this give warning.
+fn main() {
+    let total: i32 = 0; // let mut total:i32=0 this give warning.
     let result = q1_sum(total);
-    println!("Total : {}",result);
+    println!("Total : {}", result);
 }
 
-fn q1_sum(mut total:i32)->i32{ // we need mention mut here, it creates own copy of total variable. 
-    for i in 1..20{
-        if i%3==0 {
+fn q1_sum(mut total: i32) -> i32 {
+    // we need mention mut here, it creates own copy of total variable.
+    for i in 1..20 {
+        //1..=20. so here, it will include 20 also. so total 147
+        if i % 3 == 0 {
             continue;
         }
-        println!("{}",i);
+        println!("{}", i);
 
-        total = total +i;
+        total = total + i;
     }
     return total;
 }
