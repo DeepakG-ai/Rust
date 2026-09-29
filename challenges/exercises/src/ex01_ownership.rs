@@ -22,7 +22,7 @@
 /// After the caller passes their `String` here, they can never use it again.
 /// Look at the commented-out line in `t1_consume_and_measure` to see why.
 pub fn consume_and_measure(s: String) -> usize {
-    todo!("return the byte length of `s`")
+    s.len()
 }
 
 /// Task 2 — borrow, and return the number of **characters**.
@@ -30,7 +30,11 @@ pub fn consume_and_measure(s: String) -> usize {
 /// This is the classic Rust gotcha: `"héllo".len()` is 6 (bytes), but it is
 /// 5 characters. `len()` on a string is *always* bytes.
 pub fn char_count(s: &str) -> usize {
-    todo!("count chars, not bytes")
+    let mut count = 0;
+    for i in s.chars() {
+        count += 1;
+    }
+    return count;
 }
 
 /// Task 3 — mutate the caller's `String` in place.

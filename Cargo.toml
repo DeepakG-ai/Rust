@@ -200,3 +200,7 @@ path = "task/q35.rs"
 [[bin]]
 name = "closure"
 path = "src/closure.rs"
+
+[[bin]]
+name = "work"
+path = "src/work.rs"
