@@ -94,13 +94,15 @@ impl Item {
 
         let name = parts[0].trim().to_string();
 
-        let quantity = parts[1].trim().parse::<u32>().map_err(|_| {
-            format!("quantity is not a valid number: {}", parts[1].trim())
-        })?;
+        let quantity = parts[1]
+            .trim()
+            .parse::<u32>()
+            .map_err(|_| format!("quantity is not a valid number: {}", parts[1].trim()))?;
 
-        let price = parts[2].trim().parse::<f64>().map_err(|_| {
-            format!("price is not a valid number: {}", parts[2].trim())
-        })?;
+        let price = parts[2]
+            .trim()
+            .parse::<f64>()
+            .map_err(|_| format!("price is not a valid number: {}", parts[2].trim()))?;
 
         if price < 0.0 {
             return Err(format!("price below zero: {}", parts[2].trim()));
@@ -140,11 +142,11 @@ impl Warehouse {
         let mut items = Vec::new();
         for (index, line) in lines.iter().enumerate() {
             let line_num = index + 1;
-            let item = Item::from_line(line)
-                .map_err(|err| format!("line {}: {}", line_num, err))?;
+            let item =
+                Item::from_line(line).map_err(|err| format!("line {}: {}", line_num, err))?;
             items.push(item);
         }
-        Ok(Warehouse { items })
+        Ok(Warehouse { items }) // warehouse.items = [Item { laptop, qty 3,  price 999.5 },Item { mouse,  qty 10, price 25.0  },Item { cable,  qty 0,  price 5.0   },]
     }
 
     // 3. Remove stock. Take a name and an amount and change the warehouse in place.
@@ -166,45 +168,82 @@ impl Warehouse {
 
     // 5. Cheapest item. Given the warehouse, return the cheapest item that is in stock, or nothing.
     fn cheapest_in_stock(&self) -> Option<&Item> {
-        self.items
-            .iter()
-            .filter(|item| item.quantity > 0)
-            .min_by(|a, b| a.price.partial_cmp(&b.price).unwrap_or(std::cmp::Ordering::Equal))
+        // Iterator version (same result):
+        // self.items
+        //     .iter()
+        //     .filter(|item| item.quantity > 0)
+        //     .min_by(|a, b| {
+        //         a.price
+        //             .partial_cmp(&b.price)
+        //             .unwrap_or(std::cmp::Ordering::Equal)
+        //     })
+
+        let mut cheapest: Option<&Item> = None; // nothing found yet
+
+        for item in &self.items {
+            if item.quantity == 0 {
+                continue; // out of stock, ignore it
+            }
+
+            match cheapest {
+                None => cheapest = Some(item), // first in-stock item becomes the cheapest so far
+                Some(best) => {
+                    if item.price < best.price {
+                        cheapest = Some(item); // found a cheaper one
+                    }
+                }
+            }
+        }
+
+        cheapest
     }
 
     // 6. Report. Given the warehouse, produce one text line per item.
     fn report(&self) -> Vec<String> {
-        self.items
-            .iter()
-            .map(|item| format!("{} x{} ({})", item.name, item.quantity, item.stock_level()))
-            .collect()
+        // in report(), above `let mut lines`
+        // Iterator version (same result):
+        // self.items
+        //     .iter()
+        //     .map(|item| format!("{} x{} ({})", item.name, item.quantity, item.stock_level()))
+        //     .collect()
+
+        let mut lines: Vec<String> = Vec::new();
+
+        for item in &self.items {
+            let line = format!("{} x{} ({})", item.name, item.quantity, item.stock_level());
+            lines.push(line);
+        }
+
+        lines
     }
 
     // 7. Close out. Take the warehouse away from the caller completely and return its total value.
     fn close_out(self) -> f64 {
-        self.items
-            .into_iter()
-            .map(|item| item.quantity as f64 * item.price)
-            .sum()
+        // in close_out(), above `let mut total`
+        // Iterator version (same result):
+        // self.items
+        //     .into_iter()
+        //     .map(|item| item.quantity as f64 * item.price)
+        //     .sum()
+
+        let mut total: f64 = 0.0;
+
+        for item in self.items {
+            total += item.quantity as f64 * item.price;
+        }
+
+        total
     }
 }
 
 fn main() {
     // 1. Loading bad data where line 3 has a bad price
-    let bad_lines = [
-        "laptop,3,999.5",
-        "mouse,10,25.0",
-        "phone,2,-5",
-    ];
+    let bad_lines = ["laptop,3,999.5", "mouse,10,25.0", "phone,2,-5"];
     let bad_res = Warehouse::from_lines(&bad_lines);
     println!("{:?}", bad_res);
 
     // 2. Loading good data (including a cheaper item that is out of stock)
-    let good_lines = [
-        "laptop,3,999.5",
-        "mouse,10,25.0",
-        "cable,0,5.0",
-    ];
+    let good_lines = ["laptop,3,999.5", "mouse,10,25.0", "cable,0,5.0"];
     let mut warehouse = Warehouse::from_lines(&good_lines).expect("valid warehouse data");
 
     // 3. Removing stock: success, unknown item, too much
